@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(rm WeatherForecast.cs Controllers/WeatherForecastController.cs ScheduleApp.Api.http)",
+      "Bash(mkdir -p Services Repositories Models/Entities Models/Dtos Models/QueryModels Data)"
+    ]
+  }
+}
