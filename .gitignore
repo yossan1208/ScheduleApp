@@ -1,0 +1,33 @@
+# ===== .NET / ASP.NET Core =====
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# ===== TypeScript / Node =====
+node_modules/
+dist/
+*.js.map
+.env
+.env.local
+.env.*.local
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Claude Code =====
+.superpowers/
+
+# ===== IDE =====
+.idea/
+*.swp
