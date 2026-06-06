@@ -48,6 +48,9 @@ erDiagram
         int color_id FK "NOT NULL"
         int default_notification_minutes
         int group_id FK "NOT NULL"
+        bit is_active "NOT NULL DEFAULT 1"
+        bit is_deleted "NOT NULL DEFAULT 0"
+        datetime2 deleted_at
     }
 
     schedules {
@@ -62,6 +65,8 @@ erDiagram
         varchar detail
         varchar visibility "private or group"
         int notification_minutes
+        bit is_deleted "NOT NULL DEFAULT 0"
+        datetime2 deleted_at
     }
 
     notes {
@@ -71,9 +76,11 @@ erDiagram
         int group_id FK
         int creator_id FK "NOT NULL"
         datetime2 created_at
-        bit is_archived
+        bit is_archived "NOT NULL DEFAULT 0"
         int updated_by FK
         datetime2 updated_at
+        bit is_deleted "NOT NULL DEFAULT 0"
+        datetime2 deleted_at
     }
 
     memos {
