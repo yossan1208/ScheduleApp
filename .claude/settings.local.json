@@ -6,7 +6,15 @@
       "Bash(rm WeatherForecast.cs Controllers/WeatherForecastController.cs ScheduleApp.Api.http)",
       "Bash(mkdir -p Services Repositories Models/Entities Models/Dtos Models/QueryModels Data)",
       "Bash(npm --version)",
-      "Bash(npm create *)"
+      "Bash(npm create *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)",
+      "Bash(docker exec *)",
+      "Bash(dotnet test *)",
+      "Bash(rm -f /tmp/schedule_cookies.txt)",
+      "Bash(curl -c /tmp/schedule_cookies.txt -s -X POST http://localhost:5296/api/auth/login -H 'Content-Type: application/json' -d '{\"loginId\":\"admin\",\"password\":\"test1234\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -b /tmp/schedule_cookies.txt -s 'http://localhost:5296/api/schedules?from=2026-06-01&to=2026-06-30')"
     ]
   }
 }

@@ -43,6 +43,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Role).HasDefaultValue((short)2).IsRequired();
             e.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             e.HasIndex(x => x.LoginId).IsUnique();
+            e.HasOne(x => x.ThemeColor)
+             .WithMany()
+             .HasForeignKey(x => x.ThemeColorId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Session>(e =>
@@ -67,14 +71,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Name).HasMaxLength(20).IsRequired();
             e.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             e.Property(x => x.IsDeleted).HasDefaultValue(false).IsRequired();
+            e.HasOne(x => x.Color)
+             .WithMany()
+             .HasForeignKey(x => x.ColorId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Schedule>(e =>
         {
             e.ToTable("schedules");
             e.Property(x => x.Title).HasMaxLength(30).IsRequired();
-            e.Property(x => x.Visibility).HasMaxLength(10).HasDefaultValue("private").IsRequired();
+            e.Property(x => x.Visibility).HasMaxLength(10).IsRequired();
             e.Property(x => x.IsDeleted).HasDefaultValue(false).IsRequired();
+            e.HasOne(x => x.Genre)
+             .WithMany()
+             .HasForeignKey(x => x.GenreId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Note>(e =>

@@ -1,5 +1,13 @@
 # API一覧
 
+## エラーコード規則
+
+`{ドメイン}_{内容}` の形式で統一する。
+
+例: `AUTH_INVALID_CREDENTIALS` / `SCHEDULE_NOT_FOUND` / `NOTE_FORBIDDEN`
+
+---
+
 ## 凡例
 
 | 記号 | 意味 |
@@ -19,6 +27,7 @@
 | 2 | `POST` | `/api/auth/logout` | ログアウト（Cookie削除） | 🔒 |
 
 > セッション延長（スライディングウィンドウ14日）はミドルウェアで自動処理。`/refresh` エンドポイントなし。
+> ログインエラー種別：①ID/パスワード不一致 ②アカウント無効（is_active=false） ③グループ未所属（group_id=null）→「グループに加入してください」を表示
 
 ---
 
@@ -44,21 +53,27 @@
 
 | # | メソッド | パス | 説明 | 権限 |
 |---|---|---|---|---|
-| 1 | `GET` | `/api/notes` | ノート一覧取得 | 🔒 |
+| 1 | `GET` | `/api/notes` | ノート一覧取得（`?archived=true` でアーカイブ一覧） | 🔒 |
 | 2 | `POST` | `/api/notes` | ノート作成（全員可） | 🔒 |
 | 3 | `PUT` | `/api/notes/{id}` | ノート編集（名前・色） | 🔒 |
-| 4 | `PATCH` | `/api/notes/{id}/archive` | アーカイブへ移動（一般ユーザー以上） | 🔒 |
-| 5 | `DELETE` | `/api/notes/{id}` | アーカイブから削除・論理削除（全員可） | 🔒 |
+| 4 | `PATCH` | `/api/notes/{id}/archive` | アーカイブへ移動（一般ユーザー以上・`is_system=true` は不可） | 🔒 |
+| 5 | `DELETE` | `/api/notes/{id}` | アーカイブから削除・論理削除（`is_system=true` は不可） | 🔒 |
 
 **メモ**
 
 | # | メソッド | パス | 説明 | 権限 |
 |---|---|---|---|---|
 | 6 | `GET` | `/api/notes/{noteId}/memos` | メモ一覧取得 | 🔒 |
-| 7 | `POST` | `/api/notes/{noteId}/memos` | メモ作成 | 🔒 |
+| 7 | `POST` | `/api/notes/{noteId}/memos` | メモ作成（`is_system=true` のノートは不可） | 🔒 |
 | 8 | `GET` | `/api/memos/{id}` | メモ詳細取得（ブロック含む） | 🔒 |
 | 9 | `PUT` | `/api/memos/{id}` | メモ保存・メモ全体をまとめて保存 | 🔒 |
-| 10 | `DELETE` | `/api/memos/{id}` | メモ削除・物理削除（memo_blocksカスケード） | 🔒 |
+| 10 | `DELETE` | `/api/memos/{id}` | メモ削除・物理削除（`is_important=true` は不可） | 🔒 |
+
+> **重要事項ノートの仕様：**
+> - `notes.is_system = true` のノートはグループ作成時にシステムが自動生成（1グループに1つ）
+> - 対応するメモ（`memos.is_important = true`）も同時に自動生成
+> - ユーザーはこのノート・メモの作成・削除・アーカイブ不可。編集のみ可
+> - フロント：SCR-30 でこのノートを選択すると SCR-31 を経由せず SCR-32 へ直接遷移
 
 > 自動保存タイミング（フロント実装）：①入力停止2〜3秒後（デバウンス）②戻るボタン押下③アプリバックグラウンド移行時（visibilitychange）
 
@@ -104,9 +119,10 @@
 
 | # | メソッド | パス | 説明 | 権限 |
 |---|---|---|---|---|
-| 1 | `GET` | `/api/admin/users` | ユーザー一覧取得 | 👑 |
+| 1 | `GET` | `/api/admin/users` | ユーザー一覧取得（`?ungrouped=true` でグループ未所属のみ） | 👑 |
 | 2 | `POST` | `/api/admin/users` | アカウント作成・初期パスワード設定 | 👑 |
 | 3 | `PATCH` | `/api/admin/users/{id}/deactivate` | アカウント無効化 | 👑 |
+| 4 | `POST` | `/api/admin/groups` | グループ作成（グループ名＋所属ユーザーIDリスト・最低1人必須）・重要事項ノートを自動生成 | 👑 |
 
 > 再有効化はAPIなし。必要時は直接DB操作（`UPDATE users SET is_active = 1 WHERE id = <ID>`）で対応。
 

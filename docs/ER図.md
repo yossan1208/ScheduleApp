@@ -16,7 +16,7 @@ erDiagram
         int personal_color_id FK "NOT NULL"
         int theme_color_id FK "NOT NULL"
         smallInt role "NOT NULL"
-        int group_id FK "NOT NULL"
+        int group_id FK "NULL許容（未所属時はnull）"
         bit is_active
     }
 
@@ -46,7 +46,7 @@ erDiagram
         int id PK "NOT NULL"
         varchar name "NOT NULL"
         int color_id FK "NOT NULL"
-        int default_notification_minutes
+        time default_notification_time
         int group_id FK "NOT NULL"
         bit is_active "NOT NULL DEFAULT 1"
         bit is_deleted "NOT NULL DEFAULT 0"
@@ -57,16 +57,17 @@ erDiagram
         int id PK "NOT NULL"
         int creator_id FK "NOT NULL"
         int group_id FK "NOT NULL"
-        int genre_id FK
-        date date
+        int genre_id FK "NOT NULL"
+        date date "NOT NULL"
         time start_time
         time end_time
-        varchar title
+        varchar title "NOT NULL"
         varchar detail
-        varchar visibility "private or group"
-        int notification_minutes
+        varchar visibility "NOT NULL: private or group"
+        time notification_time "NOT NULL"
         bit is_deleted "NOT NULL DEFAULT 0"
         datetime2 deleted_at
+        datetime2 created_at "NOT NULL"
     }
 
     notes {
@@ -77,6 +78,7 @@ erDiagram
         int creator_id FK "NOT NULL"
         datetime2 created_at
         bit is_archived "NOT NULL DEFAULT 0"
+        bit is_system "NOT NULL DEFAULT 0"
         int updated_by FK
         datetime2 updated_at
         bit is_deleted "NOT NULL DEFAULT 0"

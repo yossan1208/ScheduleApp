@@ -9,6 +9,7 @@ public class Note
     public int       CreatorId  { get; set; }
     public DateTime  CreatedAt  { get; set; }
     public bool      IsArchived { get; set; } = false;
+    public bool      IsSystem   { get; set; } = false;
     public int?      UpdatedBy  { get; set; }
     public DateTime? UpdatedAt  { get; set; }
     public bool      IsDeleted  { get; set; } = false;
