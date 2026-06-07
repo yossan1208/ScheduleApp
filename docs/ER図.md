@@ -16,7 +16,7 @@ erDiagram
         int personal_color_id FK "NOT NULL"
         int theme_color_id FK "NOT NULL"
         smallInt role "NOT NULL"
-        int group_id FK "NOT NULL"
+        int group_id FK "NULL許容（未所属時はnull）"
         bit is_active
     }
 
@@ -77,6 +77,7 @@ erDiagram
         int creator_id FK "NOT NULL"
         datetime2 created_at
         bit is_archived "NOT NULL DEFAULT 0"
+        bit is_system "NOT NULL DEFAULT 0"
         int updated_by FK
         datetime2 updated_at
         bit is_deleted "NOT NULL DEFAULT 0"
