@@ -21,6 +21,10 @@ builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<IMemoRepository, MemoRepository>();
+builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<IMemoService, MemoService>();
 
 var app = builder.Build();
 
