@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScheduleApp.Api.Data;
 
@@ -11,9 +12,11 @@ using ScheduleApp.Api.Data;
 namespace ScheduleApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606132246_AddConstraintsAndSoftDelete")]
+    partial class AddConstraintsAndSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,16 +34,21 @@ namespace ScheduleApp.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<long?>("TargetId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("TargetType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
@@ -60,7 +68,8 @@ namespace ScheduleApp.Api.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("HexCode")
                         .IsRequired()
@@ -88,8 +97,8 @@ namespace ScheduleApp.Api.Migrations
                     b.Property<int>("ColorId")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly?>("DefaultNotificationTime")
-                        .HasColumnType("time");
+                    b.Property<int?>("DefaultNotificationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -109,11 +118,10 @@ namespace ScheduleApp.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ColorId");
 
                     b.ToTable("genres", (string)null);
                 });
@@ -128,7 +136,8 @@ namespace ScheduleApp.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -147,13 +156,16 @@ namespace ScheduleApp.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsImportant")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("NoteId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -180,13 +192,17 @@ namespace ScheduleApp.Api.Migrations
                     b.Property<int>("MemoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SortOrder")
+                    b.Property<int>("SortOrder")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MemoId");
 
                     b.ToTable("memo_blocks", (string)null);
                 });
@@ -200,25 +216,37 @@ namespace ScheduleApp.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Color")
+                        .IsRequired()
                         .HasColumnType("char(7)");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("CreatorId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("GroupId")
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<bool>("IsSystem")
-                        .HasColumnType("bit");
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -239,9 +267,6 @@ namespace ScheduleApp.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("CreatorId")
                         .HasColumnType("int");
 
@@ -257,7 +282,7 @@ namespace ScheduleApp.Api.Migrations
                     b.Property<TimeOnly?>("EndTime")
                         .HasColumnType("time");
 
-                    b.Property<int>("GenreId")
+                    b.Property<int?>("GenreId")
                         .HasColumnType("int");
 
                     b.Property<int>("GroupId")
@@ -268,23 +293,25 @@ namespace ScheduleApp.Api.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<TimeOnly>("NotificationTime")
-                        .HasColumnType("time");
+                    b.Property<int?>("NotificationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<TimeOnly?>("StartTime")
                         .HasColumnType("time");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Visibility")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasDefaultValue("private");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
 
                     b.ToTable("schedules", (string)null);
                 });
@@ -297,14 +324,16 @@ namespace ScheduleApp.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("ExpiresAt")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("LastActiveAt")
+                    b.Property<DateTime>("LastActiveAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -322,11 +351,13 @@ namespace ScheduleApp.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("GroupId")
+                    b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("LoginId")
                         .IsRequired()
@@ -335,17 +366,21 @@ namespace ScheduleApp.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("PersonalColorId")
                         .HasColumnType("int");
 
                     b.Property<short>("Role")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)2);
 
                     b.Property<int>("ThemeColorId")
                         .HasColumnType("int");
@@ -354,8 +389,6 @@ namespace ScheduleApp.Api.Migrations
 
                     b.HasIndex("LoginId")
                         .IsUnique();
-
-                    b.HasIndex("ThemeColorId");
 
                     b.ToTable("users", (string)null);
                 });
@@ -375,7 +408,9 @@ namespace ScheduleApp.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -385,37 +420,13 @@ namespace ScheduleApp.Api.Migrations
                     b.ToTable("user_notification_settings", (string)null);
                 });
 
-            modelBuilder.Entity("ScheduleApp.Api.Models.Entities.Genre", b =>
+            modelBuilder.Entity("ScheduleApp.Api.Models.Entities.MemoBlock", b =>
                 {
-                    b.HasOne("ScheduleApp.Api.Models.Entities.Color", "Color")
+                    b.HasOne("ScheduleApp.Api.Models.Entities.Memo", null)
                         .WithMany()
-                        .HasForeignKey("ColorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("MemoId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Color");
-                });
-
-            modelBuilder.Entity("ScheduleApp.Api.Models.Entities.Schedule", b =>
-                {
-                    b.HasOne("ScheduleApp.Api.Models.Entities.Genre", "Genre")
-                        .WithMany()
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Genre");
-                });
-
-            modelBuilder.Entity("ScheduleApp.Api.Models.Entities.User", b =>
-                {
-                    b.HasOne("ScheduleApp.Api.Models.Entities.Color", "ThemeColor")
-                        .WithMany()
-                        .HasForeignKey("ThemeColorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ThemeColor");
                 });
 #pragma warning restore 612, 618
         }

@@ -43,9 +43,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<AuditLog>(e => e.ToTable("audit_logs"));
 
-        modelBuilder.Entity<Genre>(e => e.ToTable("genres"));
+        modelBuilder.Entity<Genre>(e =>
+        {
+            e.ToTable("genres");
+            e.Property(x => x.IsActive).HasDefaultValue(true);
+            e.Property(x => x.IsDeleted).HasDefaultValue(false);
+            e.HasOne(x => x.Color)
+             .WithMany()
+             .HasForeignKey(x => x.ColorId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
 
-        modelBuilder.Entity<Schedule>(e => e.ToTable("schedules"));
+        modelBuilder.Entity<Schedule>(e =>
+        {
+            e.ToTable("schedules");
+            e.Property(x => x.IsDeleted).HasDefaultValue(false);
+            e.HasOne(x => x.Genre)
+             .WithMany()
+             .HasForeignKey(x => x.GenreId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<Note>(e =>
         {
