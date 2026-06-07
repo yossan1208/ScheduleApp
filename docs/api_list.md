@@ -1,5 +1,13 @@
 # API一覧
 
+## エラーコード規則
+
+`{ドメイン}_{内容}` の形式で統一する。
+
+例: `AUTH_INVALID_CREDENTIALS` / `SCHEDULE_NOT_FOUND` / `NOTE_FORBIDDEN`
+
+---
+
 ## 凡例
 
 | 記号 | 意味 |
