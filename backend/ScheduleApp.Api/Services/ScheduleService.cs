@@ -30,18 +30,27 @@ public class ScheduleService(IScheduleRepository repo) : IScheduleService
 
     public async Task<ScheduleResult> CreateAsync(ScheduleRequest request, int userId, int groupId)
     {
+        if (!DateOnly.TryParse(request.Date, out var date))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (!TimeOnly.TryParse(request.NotificationTime, out var notificationTime))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (request.StartTime is not null && !TimeOnly.TryParse(request.StartTime, out _))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (request.EndTime is not null && !TimeOnly.TryParse(request.EndTime, out _))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+
         var schedule = new Schedule
         {
             CreatorId        = userId,
             GroupId          = groupId,
             GenreId          = request.GenreId,
-            Date             = DateOnly.Parse(request.Date),
+            Date             = date,
             Title            = request.Title,
             Detail           = request.Detail,
             Visibility       = request.Visibility,
             StartTime        = request.StartTime is null ? null : TimeOnly.Parse(request.StartTime),
             EndTime          = request.EndTime   is null ? null : TimeOnly.Parse(request.EndTime),
-            NotificationTime = TimeOnly.Parse(request.NotificationTime),
+            NotificationTime = notificationTime,
             CreatedAt        = DateTime.UtcNow,
         };
 
@@ -58,14 +67,23 @@ public class ScheduleService(IScheduleRepository repo) : IScheduleService
         if (schedule.CreatorId != userId)
             return new ScheduleResult(null, "SCHEDULE_FORBIDDEN");
 
+        if (!DateOnly.TryParse(request.Date, out var date))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (!TimeOnly.TryParse(request.NotificationTime, out var notificationTime))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (request.StartTime is not null && !TimeOnly.TryParse(request.StartTime, out _))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+        if (request.EndTime is not null && !TimeOnly.TryParse(request.EndTime, out _))
+            return new ScheduleResult(null, "SCHEDULE_INVALID");
+
         schedule.GenreId          = request.GenreId;
-        schedule.Date             = DateOnly.Parse(request.Date);
+        schedule.Date             = date;
         schedule.Title            = request.Title;
         schedule.Detail           = request.Detail;
         schedule.Visibility       = request.Visibility;
         schedule.StartTime        = request.StartTime is null ? null : TimeOnly.Parse(request.StartTime);
         schedule.EndTime          = request.EndTime   is null ? null : TimeOnly.Parse(request.EndTime);
-        schedule.NotificationTime = TimeOnly.Parse(request.NotificationTime);
+        schedule.NotificationTime = notificationTime;
 
         await repo.UpdateAsync(schedule);
         return new ScheduleResult(MapToResponse(schedule), null);
