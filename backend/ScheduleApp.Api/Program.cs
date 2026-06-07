@@ -27,6 +27,8 @@ builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<IMemoService, MemoService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
+builder.Services.AddScoped<IUserSettingService, UserSettingService>();
 
 var app = builder.Build();
 
