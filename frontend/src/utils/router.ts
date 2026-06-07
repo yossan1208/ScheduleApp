@@ -2,9 +2,7 @@
 type PageLoader = () => Promise<{ mount: (app: HTMLElement) => void }>;
 
 const routes: Record<string, PageLoader> = {
-  // 各画面は pages/ 以下に追加していく
-  // '/':        () => import('../pages/login'),
-  // '/home':    () => import('../pages/home'),
+  '/': () => import('../pages/login'),
 };
 
 export async function navigate(path: string): Promise<void> {

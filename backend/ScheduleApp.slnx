@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="ScheduleApp.Api/ScheduleApp.Api.csproj" />
+  <Project Path="ScheduleApp.Tests/ScheduleApp.Tests.csproj" />
 </Solution>

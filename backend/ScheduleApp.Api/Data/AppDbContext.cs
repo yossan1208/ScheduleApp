@@ -33,6 +33,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.ToTable("users");
             e.HasIndex(x => x.LoginId).IsUnique();
             e.Property(x => x.LoginId).HasMaxLength(50);
+            e.HasOne(x => x.ThemeColor)
+             .WithMany()
+             .HasForeignKey(x => x.ThemeColorId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Session>(e => e.ToTable("sessions"));
