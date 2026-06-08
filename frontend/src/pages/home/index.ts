@@ -115,8 +115,8 @@ export function mount(app: HTMLElement): void {
   app.innerHTML = `
     <div class="home-page">
       <div class="home-header">
-        <button class="icon-btn" id="btn-settings" aria-label="設定">⚙</button>
         <h2 class="month-label" id="month-label">${monthLabel(currentYear, currentMonth)}</h2>
+        <button class="icon-btn" id="btn-settings" aria-label="設定">⚙</button>
       </div>
       <div class="calendar-wrapper" id="calendar-wrapper"></div>
       <div class="view-tab-bar">
