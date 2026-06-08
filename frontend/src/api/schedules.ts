@@ -20,6 +20,8 @@ export interface Schedule {
 }
 
 export const schedules = {
-  getSchedules: (from: string, to: string) =>
-    api.get<Schedule[]>(`/schedules?from=${from}&to=${to}`),
+  getSchedules: (from: string, to: string) => {
+    const params = new URLSearchParams({ from, to });
+    return api.get<Schedule[]>(`/schedules?${params}`);
+  },
 };
