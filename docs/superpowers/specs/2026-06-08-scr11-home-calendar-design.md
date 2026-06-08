@@ -132,18 +132,32 @@ fetchSchedules → buildCalendarGrid → 再描画
 
 ## 予定データ型（`api/schedules.ts`）
 
+バックエンドの `ScheduleResponse` に合わせた型定義：
+
 ```typescript
+interface ScheduleGenre {
+  id: number
+  name: string
+  colorHex: string   // "#FF8C00" など
+}
+
 interface Schedule {
   id: number
+  creatorId: number
+  date: string             // "YYYY-MM-DD"
+  startTime: string | null // "09:00" など
+  endTime: string | null
   title: string
-  startAt: string      // ISO8601
-  endAt: string
-  genreColor: string   // "#FF8C00" など
-  creatorName: string
+  detail: string | null
+  visibility: string
+  notificationTime: string
+  genre: ScheduleGenre | null
 }
 ```
 
-予定表示: 左端にジャンルカラーのバー（4px幅）+ タイトルテキスト。セルに収まらない件数は「+n」で省略。
+カレンダー表示で使うフィールド: `date`（セル特定）、`title`（テキスト）、`genre?.colorHex`（カラーバー）。
+
+予定表示: 左端にジャンルカラーのバー（4px幅）+ タイトルテキスト。ジャンルなし（`genre = null`）の場合はグレー（`#9E9E9E`）のバー。セルに収まらない件数は「+n」で省略。
 
 ---
 
