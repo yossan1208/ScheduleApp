@@ -6,6 +6,9 @@ import { navigate } from '../../utils/router';
 let currentYear      = 0;
 let currentMonth     = 0;
 let currentSchedules: Schedule[] = [];
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+let didSwipe = false;
+let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
 
 function pad(n: number): string {
   return String(n).padStart(2, '0');
@@ -58,6 +61,8 @@ function attachSwipe(wrapper: HTMLElement, label: HTMLElement): void {
     const delta = y - startY;
     if (Math.abs(delta) < 50) return;
 
+    didSwipe = true;
+
     // スライドアウトアニメーション
     const grid = wrapper.querySelector<HTMLElement>('.calendar-grid');
     if (grid) {
@@ -66,29 +71,36 @@ function attachSwipe(wrapper: HTMLElement, label: HTMLElement): void {
     }
 
     if (delta < 0) {
-      // 上スワイプ → 翌月
       currentMonth++;
       if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     } else {
-      // 下スワイプ → 前月
       currentMonth--;
       if (currentMonth < 0) { currentMonth = 11; currentYear--; }
     }
 
-    setTimeout(() => refreshCalendar(wrapper, label), 150);
+    if (refreshTimer !== null) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(
+      () => refreshCalendar(wrapper, label).catch(() => {}),
+      150,
+    );
   }
 
   // タッチ
   wrapper.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
   wrapper.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientY));
 
-  // マウス
+  // マウス（window に登録し、前回分を削除してからセット）
+  if (mouseUpHandler !== null) {
+    window.removeEventListener('mouseup', mouseUpHandler);
+  }
+  mouseUpHandler = (e: MouseEvent) => { if (isDragging) onEnd(e.clientY); };
   wrapper.addEventListener('mousedown', e => onStart(e.clientY));
-  window.addEventListener('mouseup',    e => { if (isDragging) onEnd(e.clientY); });
+  window.addEventListener('mouseup', mouseUpHandler);
 }
 
 function attachCellClick(wrapper: HTMLElement): void {
   wrapper.addEventListener('click', (e) => {
+    if (didSwipe) { didSwipe = false; return; }
     const cell = (e.target as Element).closest<HTMLElement>('.calendar-cell');
     if (!cell?.dataset.date) return;
     navigate(`/day?date=${cell.dataset.date}`);
@@ -125,12 +137,12 @@ export function mount(app: HTMLElement): void {
   attachSwipe(wrapper, label);
   attachCellClick(wrapper);
 
-  app.querySelector('#btn-settings')
-    ?.addEventListener('click', () => navigate('/settings'));
-  app.querySelector('#btn-notes')
-    ?.addEventListener('click', () => navigate('/notes'));
-  app.querySelector('#btn-new-schedule')
-    ?.addEventListener('click', () => navigate('/schedule/new'));
+  app.querySelector<HTMLElement>('#btn-settings')!
+    .addEventListener('click', () => navigate('/settings'));
+  app.querySelector<HTMLElement>('#btn-notes')!
+    .addEventListener('click', () => navigate('/notes'));
+  app.querySelector<HTMLElement>('#btn-new-schedule')!
+    .addEventListener('click', () => navigate('/schedule/new'));
 
-  refreshCalendar(wrapper, label);
+  refreshCalendar(wrapper, label).catch(() => {});
 }
