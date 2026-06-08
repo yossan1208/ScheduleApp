@@ -3,6 +3,7 @@ type PageLoader = () => Promise<{ mount: (app: HTMLElement) => void }>;
 
 const routes: Record<string, PageLoader> = {
   '/': () => import('../pages/login'),
+  '/home': () => import('../pages/home'),
 };
 
 export async function navigate(path: string): Promise<void> {
