@@ -18,11 +18,11 @@ export async function navigate(path: string): Promise<void> {
     return;
   }
 
+  window.history.pushState(null, '', path);
+
   const page = await loader();
   app.innerHTML = '';
   page.mount(app);
-
-  window.history.pushState(null, '', path);
 }
 
 export function initRouter(): void {
