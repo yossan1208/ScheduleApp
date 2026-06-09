@@ -3,7 +3,6 @@ import { schedules, type Schedule } from '../../api/schedules';
 import { navigate } from '../../utils/router';
 
 const DAYS_SHOWN   = 7;
-const MAX_DAYS     = 14;
 const DAY_NAMES_JA = ['日', '月', '火', '水', '木', '金', '土'];
 
 // ─── ユーティリティ ────────────────────────────────────
@@ -37,18 +36,19 @@ function isTodayInWindow(startDate: string, today: string): boolean {
   return today >= startDate && today <= end;
 }
 
-// ─── DOM: 7行描画 ─────────────────────────────────────
+// ─── DOM: 21行描画 ────────────────────────────────────
 
 function renderRows(
-  body: HTMLElement,
+  container: HTMLElement,
   startDate: string,
   scheduleMap: Map<string, Schedule[]>,
   today: string,
 ): void {
-  body.innerHTML = '';
-  const dates = dateRangeArray(startDate, DAYS_SHOWN);
+  container.innerHTML = '';
+  // 21 dates: from startDate-7 to startDate+13
+  const allDates = dateRangeArray(addDays(startDate, -DAYS_SHOWN), DAYS_SHOWN * 3);
 
-  dates.forEach(dateStr => {
+  allDates.forEach(dateStr => {
     const d = new Date(`${dateStr}T00:00:00`);
     const dayName = DAY_NAMES_JA[d.getDay()];
     const dayNum  = String(d.getDate());
@@ -78,11 +78,8 @@ function renderRows(
     const schCol = document.createElement('div');
     schCol.className = 'week-schedules-col';
 
-    if (list.length === 0) {
-      // empty — nothing to add
-    } else {
-      const shown = list.slice(0, 2);
-      shown.forEach(s => {
+    if (list.length > 0) {
+      list.slice(0, 2).forEach(s => {
         const card = document.createElement('div');
         card.className = 'week-schedule-card';
 
@@ -109,7 +106,7 @@ function renderRows(
 
     row.appendChild(dateCol);
     row.appendChild(schCol);
-    body.appendChild(row);
+    container.appendChild(row);
   });
 }
 
@@ -134,82 +131,99 @@ function updateMonthLabel(el: HTMLElement, startDate: string): void {
 function attachScrollSwipe(
   el: HTMLElement,
   body: HTMLElement,
-  onScroll: (deltaDays: number) => void,
+  container: HTMLElement,
+  onSnap: (deltaDays: number) => void,
   onRight: () => void,
 ): void {
-  let startX              = 0;
-  let startY              = 0;
-  let tracking            = false;
-  let directionDetermined = false;
-  let isVertical          = false;
-  let currentDy           = 0;
-  let mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
-  let mouseUpHandler:   ((e: MouseEvent) => void) | null = null;
+  let startX        = 0;
+  let startTouchY   = 0;
+  let startTransY   = 0;
+  let currentTransY = 0;
+  let tracking      = false;
+  let dirDetermined = false;
+  let isVertical    = false;
+  let mmh: ((e: MouseEvent) => void) | null = null;
+  let muh: ((e: MouseEvent) => void) | null = null;
 
-  function rowHeight(): number {
-    return body.offsetHeight / DAYS_SHOWN;
+  function rh(): number { return body.offsetHeight / DAYS_SHOWN; }
+  function minY(): number { return -2 * body.offsetHeight; }
+
+  function readTransY(): number {
+    const raw = window.getComputedStyle(container).transform;
+    if (!raw || raw === 'none') return -body.offsetHeight;
+    return new DOMMatrix(raw).m42;
+  }
+
+  function applyTransform(y: number): void {
+    container.style.transform = `translateY(${y}px)`;
   }
 
   function onStart(x: number, y: number): void {
-    startX              = x;
-    startY              = y;
-    tracking            = true;
-    directionDetermined = false;
-    isVertical          = false;
-    currentDy           = 0;
-    body.style.transition = '';
+    startTransY   = readTransY();
+    currentTransY = startTransY;
+    container.style.transition = '';
+    applyTransform(currentTransY);
+    startX        = x;
+    startTouchY   = y;
+    tracking      = true;
+    dirDetermined = false;
+    isVertical    = false;
   }
 
   function onMove(x: number, y: number): void {
     if (!tracking) return;
     const dx    = x - startX;
-    const dy    = y - startY;
+    const dy    = y - startTouchY;
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (!directionDetermined) {
+    if (!dirDetermined) {
       if (absDx > 8 || absDy > 8) {
-        directionDetermined = true;
+        dirDetermined = true;
         isVertical = absDy >= absDx;
       }
       return;
     }
-
     if (!isVertical) return;
 
-    // Clamp to ±MAX_DAYS rows
-    const maxPx = MAX_DAYS * rowHeight();
-    currentDy   = Math.max(-maxPx, Math.min(maxPx, dy));
-    body.style.transform = `translateY(${currentDy}px)`;
+    const newY = Math.max(minY(), Math.min(0, startTransY + dy));
+    currentTransY = newY;
+    applyTransform(newY);
   }
 
-  function onEnd(x: number, _y: number): void {
+  function onEnd(x: number): void {
     if (!tracking) return;
     tracking = false;
 
-    const dx    = x - startX;
-    const absDx = Math.abs(dx);
-
     if (!isVertical) {
-      // Horizontal right swipe → go back
-      if (absDx > 30 && dx > 0) onRight();
-      body.style.transform = '';
+      if (Math.abs(x - startX) > 30 && x - startX > 0) onRight();
       return;
     }
 
     // Snap to nearest row boundary
-    const rh         = rowHeight();
-    const days       = -Math.round(currentDy / rh); // up = negative dy = positive days (future)
-    const clamped    = Math.max(-MAX_DAYS, Math.min(MAX_DAYS, days));
+    const rowH     = rh();
+    const snapY    = Math.round(currentTransY / rowH) * rowH;
+    const clampedY = Math.max(minY(), Math.min(0, snapY));
 
-    // Animate snap back to 0
-    body.style.transition = 'transform 0.18s ease';
-    body.style.transform  = 'translateY(0)';
+    container.style.transition = 'transform 0.18s ease';
+    applyTransform(clampedY);
 
     setTimeout(() => {
-      body.style.transition = '';
-      if (clamped !== 0) {
-        onScroll(clamped);
+      container.style.transition = '';
+      // Calculate how many days shifted (positive = future, negative = past)
+      const initialY  = -body.offsetHeight; // -7 * rowH
+      const deltaDays = Math.round((initialY - clampedY) / rowH);
+
+      // Reset to initial position silently (no transition)
+      currentTransY = initialY;
+      container.style.transition = 'none';
+      applyTransform(initialY);
+      // Force reflow so 'none' takes effect before we remove it
+      void container.offsetHeight;
+      container.style.transition = '';
+
+      if (deltaDays !== 0) {
+        onSnap(deltaDays);
       }
     }, 180);
   }
@@ -217,24 +231,21 @@ function attachScrollSwipe(
   // Touch
   el.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
   el.addEventListener('touchmove',  e => onMove(e.touches[0].clientX, e.touches[0].clientY),  { passive: true });
-  el.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+  el.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX));
 
   // Mouse
   el.addEventListener('mousedown', e => {
     onStart(e.clientX, e.clientY);
-
-    if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler);
-    if (mouseUpHandler)   window.removeEventListener('mouseup',   mouseUpHandler);
-
-    mouseMoveHandler = (me: MouseEvent) => onMove(me.clientX, me.clientY);
-    mouseUpHandler   = (me: MouseEvent) => {
-      if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler);
-      if (mouseUpHandler)   window.removeEventListener('mouseup',   mouseUpHandler);
-      onEnd(me.clientX, me.clientY);
+    if (mmh) window.removeEventListener('mousemove', mmh);
+    if (muh) window.removeEventListener('mouseup',   muh);
+    mmh = (me: MouseEvent) => onMove(me.clientX, me.clientY);
+    muh = (me: MouseEvent) => {
+      if (mmh) window.removeEventListener('mousemove', mmh);
+      if (muh) window.removeEventListener('mouseup',   muh);
+      onEnd(me.clientX);
     };
-
-    window.addEventListener('mousemove', mouseMoveHandler);
-    window.addEventListener('mouseup',   mouseUpHandler);
+    window.addEventListener('mousemove', mmh);
+    window.addEventListener('mouseup',   muh);
   });
 }
 
@@ -255,7 +266,9 @@ export function mount(app: HTMLElement): void {
           <button class="week-gear-btn" id="btn-gear" aria-label="設定">⚙</button>
           <div class="week-month-label" id="week-month-label">${getMonthLabel(startDate)}</div>
         </div>
-        <div class="week-body" id="week-body"></div>
+        <div class="week-body" id="week-body">
+          <div class="week-rows-container" id="week-rows-container"></div>
+        </div>
       </div>
       <div class="week-footer">
         <button class="week-today-btn hidden" id="btn-today">Today</button>
@@ -265,17 +278,19 @@ export function mount(app: HTMLElement): void {
     </div>
   `;
 
-  const body       = app.querySelector<HTMLElement>('#week-body')!;
-  const monthLabel = app.querySelector<HTMLElement>('#week-month-label')!;
+  const body          = app.querySelector<HTMLElement>('#week-body')!;
+  const rowsContainer = app.querySelector<HTMLElement>('#week-rows-container')!;
+  const monthLabel    = app.querySelector<HTMLElement>('#week-month-label')!;
   const todayBtn   = app.querySelector<HTMLElement>('#btn-today')!;
 
   // ─── データ取得と描画 ──────────────────────────────
   async function fetchAndRender(): Promise<void> {
-    const id  = ++fetchId;
-    const end = addDays(startDate, DAYS_SHOWN - 1);
+    const id         = ++fetchId;
+    const fetchStart = addDays(startDate, -DAYS_SHOWN);
+    const fetchEnd   = addDays(startDate, DAYS_SHOWN * 2 - 1);
 
-    const result = await schedules.getSchedules(startDate, end).catch(() => null);
-    if (id !== fetchId) return; // 古いリクエストは無視
+    const result = await schedules.getSchedules(fetchStart, fetchEnd).catch(() => null);
+    if (id !== fetchId) return;
 
     const scheduleMap = new Map<string, Schedule[]>();
     if (result?.success && result.data) {
@@ -284,13 +299,12 @@ export function mount(app: HTMLElement): void {
         arr.push(s);
         scheduleMap.set(s.date, arr);
       });
-      // 各日を開始時間でソート
       scheduleMap.forEach(arr =>
         arr.sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? '')),
       );
     }
 
-    renderRows(body, startDate, scheduleMap, today);
+    renderRows(rowsContainer, startDate, scheduleMap, today);
     updateTodayBtn(todayBtn, startDate, today);
     updateMonthLabel(monthLabel, startDate);
   }
@@ -299,7 +313,8 @@ export function mount(app: HTMLElement): void {
   attachScrollSwipe(
     app.querySelector<HTMLElement>('.week-top')!,
     body,
-    (deltaDays) => {
+    rowsContainer,
+    (deltaDays: number) => {
       startDate = addDays(startDate, deltaDays);
       window.history.replaceState(null, '', `/week?start=${startDate}`);
       fetchAndRender().catch(() => {});
