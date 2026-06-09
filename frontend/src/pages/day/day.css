@@ -52,16 +52,23 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* === リストビュー: スワイプラッパー === */
+.day-card-swipe-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
 /* === リストビュー: 予定カード === */
 .day-card {
   display: flex;
   align-items: stretch;
   background-color: #2a2a2a;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
   overflow: hidden;
   cursor: pointer;
-  transition: background 0.15s;
+  transform: translateX(0);
+  transition: background 0.15s, transform 0.2s ease;
 }
 
 .day-card:hover {
@@ -132,19 +139,28 @@
   margin-top: 0.45rem;
 }
 
-/* === タイムラインイベントブロック === */
-.day-event-block {
+/* === タイムラインスワイプラッパー === */
+.day-event-swipe-wrap {
   position: absolute;
   left: 2.5rem;
   right: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/* === タイムラインイベントブロック === */
+.day-event-block {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: stretch;
   background-color: #2a2a2a;
-  border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.2s ease;
   min-height: 20px;
+  transform: translateX(0);
 }
 
 .day-event-block:hover {
@@ -173,6 +189,25 @@
 .day-event-time {
   font-size: 0.7rem;
   color: #aaa;
+}
+
+/* === 削除ボタン（共通） === */
+.day-delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 64px;
+  background-color: #c62828;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* === フッター === */
