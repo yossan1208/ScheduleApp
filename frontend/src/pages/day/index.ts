@@ -73,6 +73,11 @@ function renderList(area: HTMLElement, list: Schedule[]): void {
 function renderTimeline(area: HTMLElement, list: Schedule[]): void {
   area.innerHTML = '';
 
+  if (list.length === 0) {
+    area.innerHTML = '<div class="day-empty">予定なし</div>';
+    return;
+  }
+
   const container = document.createElement('div');
   container.className = 'day-timeline';
 
