@@ -284,5 +284,5 @@ export function mount(app: HTMLElement): void {
     .addEventListener('click', () => navigate(`/schedule/new?date=${dateStr}`));
 
   // 左右スワイプ
-  attachSwipe(page, dateStr, newDate => navigate(`/day?date=${newDate}`));
+  attachSwipe(page, dateStr, newDate => navigate(`/day?date=${newDate}`, true));
 }
