@@ -14,6 +14,11 @@ function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
 
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function monthLabel(year: number, month: number): string {
   return `${year}年${month + 1}月`;
 }
@@ -44,33 +49,47 @@ async function refreshCalendar(
 }
 
 function attachSwipe(wrapper: HTMLElement, label: HTMLElement): void {
+  let startX     = 0;
   let startY     = 0;
   let isDragging = false;
 
-  function onStart(y: number): void {
+  function onStart(x: number, y: number): void {
+    startX     = x;
     startY     = y;
     isDragging = true;
     wrapper.classList.add('grabbing');
   }
 
-  function onEnd(y: number): void {
+  function onEnd(x: number, y: number): void {
     if (!isDragging) return;
     isDragging = false;
     wrapper.classList.remove('grabbing');
 
-    const delta = y - startY;
-    if (Math.abs(delta) < 50) return;
+    const dx    = x - startX;
+    const dy    = y - startY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    // 水平スワイプ（左）→ SCR-10（週ビュー）へ
+    if (absDx > absDy && absDx > 50 && dx < 0) {
+      didSwipe = true;
+      navigate(`/week?start=${todayStr()}`);
+      return;
+    }
+
+    // 縦スワイプ → 月を変える（既存ロジック）
+    if (Math.abs(dy) < 50) return;
 
     didSwipe = true;
 
     // スライドアウトアニメーション
     const grid = wrapper.querySelector<HTMLElement>('.calendar-grid');
     if (grid) {
-      grid.style.transform = `translateY(${delta < 0 ? '-40px' : '40px'})`;
+      grid.style.transform = `translateY(${dy < 0 ? '-40px' : '40px'})`;
       grid.style.opacity   = '0';
     }
 
-    if (delta < 0) {
+    if (dy < 0) {
       currentMonth++;
       if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     } else {
@@ -86,15 +105,15 @@ function attachSwipe(wrapper: HTMLElement, label: HTMLElement): void {
   }
 
   // タッチ
-  wrapper.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
-  wrapper.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientY));
+  wrapper.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+  wrapper.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
 
   // マウス（window に登録し、前回分を削除してからセット）
   if (mouseUpHandler !== null) {
     window.removeEventListener('mouseup', mouseUpHandler);
   }
-  mouseUpHandler = (e: MouseEvent) => { if (isDragging) onEnd(e.clientY); };
-  wrapper.addEventListener('mousedown', e => onStart(e.clientY));
+  mouseUpHandler = (e: MouseEvent) => { if (isDragging) onEnd(e.clientX, e.clientY); };
+  wrapper.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
   window.addEventListener('mouseup', mouseUpHandler);
 }
 
@@ -122,7 +141,7 @@ export function mount(app: HTMLElement): void {
       <div class="view-tab-bar">
         <button class="tab-btn" disabled>Y</button>
         <button class="tab-btn active">M</button>
-        <button class="tab-btn" disabled>W</button>
+        <button class="tab-btn" id="btn-week-tab">W</button>
       </div>
       <div class="fab-group">
         <button class="fab" id="btn-notes" aria-label="共有事項">!</button>
@@ -137,6 +156,8 @@ export function mount(app: HTMLElement): void {
   attachSwipe(wrapper, label);
   attachCellClick(wrapper);
 
+  app.querySelector<HTMLElement>('#btn-week-tab')!
+    .addEventListener('click', () => navigate(`/week?start=${todayStr()}`));
   app.querySelector<HTMLElement>('#btn-settings')!
     .addEventListener('click', () => navigate('/settings'));
   app.querySelector<HTMLElement>('#btn-notes')!

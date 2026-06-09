@@ -5,6 +5,7 @@ const routes: Record<string, PageLoader> = {
   '/': () => import('../pages/login'),
   '/home': () => import('../pages/home'),
   '/day': () => import('../pages/day'),
+  '/week': () => import('../pages/week'),
 };
 
 export async function navigate(path: string, replace = false): Promise<void> {
