@@ -7,12 +7,16 @@ const routes: Record<string, PageLoader> = {
   '/day': () => import('../pages/day'),
 };
 
-export async function navigate(path: string): Promise<void> {
+export async function navigate(path: string, replace = false): Promise<void> {
   const app = document.getElementById('app');
   if (!app) return;
 
   const pathname = path.split('?')[0];
-  window.history.pushState(null, '', path);
+  if (replace) {
+    window.history.replaceState(null, '', path);
+  } else {
+    window.history.pushState(null, '', path);
+  }
 
   const loader = routes[pathname];
   if (!loader) {
@@ -26,7 +30,8 @@ export async function navigate(path: string): Promise<void> {
 }
 
 export function initRouter(): void {
+  // popstate (back/forward) は replaceState でコンテンツのみ更新する
   window.addEventListener('popstate', () =>
-    navigate(location.pathname + location.search),
+    navigate(location.pathname + location.search, true),
   );
 }
