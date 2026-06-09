@@ -12,13 +12,13 @@ export async function navigate(path: string): Promise<void> {
   if (!app) return;
 
   const pathname = path.split('?')[0];
+  window.history.pushState(null, '', path);
+
   const loader = routes[pathname];
   if (!loader) {
     app.innerHTML = `<p>画面が見つかりません: ${pathname}</p>`;
     return;
   }
-
-  window.history.pushState(null, '', path);
 
   const page = await loader();
   app.innerHTML = '';
