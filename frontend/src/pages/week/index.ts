@@ -79,25 +79,32 @@ function renderRows(
     schCol.className = 'week-schedules-col';
 
     if (list.length === 0) {
-      // 何も表示しない（空行）
-    } else if (list.length <= 2) {
-      list.forEach(s => {
-        const item = document.createElement('div');
-        item.className   = 'week-schedule-item';
-        item.textContent = s.title;
-        schCol.appendChild(item);
-      });
+      // empty — nothing to add
     } else {
-      // 1件目を表示、2件目を "+N件" に
-      const first = document.createElement('div');
-      first.className   = 'week-schedule-item';
-      first.textContent = list[0].title;
-      schCol.appendChild(first);
+      const shown = list.slice(0, 2);
+      shown.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'week-schedule-card';
 
-      const more = document.createElement('div');
-      more.className   = 'week-schedule-more';
-      more.textContent = `+${list.length - 1}件`;
-      schCol.appendChild(more);
+        const bar = document.createElement('div');
+        bar.className = 'week-schedule-card-bar';
+        bar.style.backgroundColor = s.genre?.colorHex ?? '#9e9e9e';
+
+        const title = document.createElement('div');
+        title.className   = 'week-schedule-card-title';
+        title.textContent = s.title;
+
+        card.appendChild(bar);
+        card.appendChild(title);
+        schCol.appendChild(card);
+      });
+
+      if (list.length > 2) {
+        const more = document.createElement('div');
+        more.className   = 'week-schedule-more';
+        more.textContent = `+${list.length - 2}件`;
+        schCol.appendChild(more);
+      }
     }
 
     row.appendChild(dateCol);
@@ -122,58 +129,112 @@ function updateMonthLabel(el: HTMLElement, startDate: string): void {
   el.textContent = getMonthLabel(startDate);
 }
 
-// ─── スワイプ（方向判定・速度計算）──────────────────────
+// ─── スクロール＋スワイプ（リアルタイム追従・スナップ）────
 
-function attachSwipe(
+function attachScrollSwipe(
   el: HTMLElement,
-  onVertical: (deltaDays: number) => void,
+  body: HTMLElement,
+  onScroll: (deltaDays: number) => void,
   onRight: () => void,
 ): void {
-  let startX    = 0;
-  let startY    = 0;
-  let startTime = 0;
-  let tracking  = false;
-  let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
+  let startX              = 0;
+  let startY              = 0;
+  let tracking            = false;
+  let directionDetermined = false;
+  let isVertical          = false;
+  let currentDy           = 0;
+  let mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+  let mouseUpHandler:   ((e: MouseEvent) => void) | null = null;
 
-  function onStart(x: number, y: number): void {
-    startX    = x;
-    startY    = y;
-    startTime = Date.now();
-    tracking  = true;
+  function rowHeight(): number {
+    return body.offsetHeight / DAYS_SHOWN;
   }
 
-  function onEnd(x: number, y: number): void {
-    if (!tracking) return;
-    tracking = false;
+  function onStart(x: number, y: number): void {
+    startX              = x;
+    startY              = y;
+    tracking            = true;
+    directionDetermined = false;
+    isVertical          = false;
+    currentDy           = 0;
+    body.style.transition = '';
+  }
 
-    const dx  = x - startX;
-    const dy  = y - startY;
-    const dt  = Math.max(1, Date.now() - startTime); // avoid divide-by-zero
+  function onMove(x: number, y: number): void {
+    if (!tracking) return;
+    const dx    = x - startX;
+    const dy    = y - startY;
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (absDx > absDy && absDx > 30) {
-      // 水平スワイプ
-      if (dx > 0) onRight(); // 右スワイプ → SCR-11へ戻る
-      // 左スワイプは未定義（無視）
-    } else if (absDy > absDx && absDy > 30) {
-      // 縦スワイプ: 速度で日数を決める
-      const velocity = absDy / dt; // px/ms
-      const days     = Math.max(1, Math.min(MAX_DAYS, Math.round(velocity * 10)));
-      onVertical(dy < 0 ? days : -days); // 上 → 未来、下 → 過去
+    if (!directionDetermined) {
+      if (absDx > 8 || absDy > 8) {
+        directionDetermined = true;
+        isVertical = absDy >= absDx;
+      }
+      return;
     }
+
+    if (!isVertical) return;
+
+    // Clamp to ±MAX_DAYS rows
+    const maxPx = MAX_DAYS * rowHeight();
+    currentDy   = Math.max(-maxPx, Math.min(maxPx, dy));
+    body.style.transform = `translateY(${currentDy}px)`;
   }
 
-  // タッチ
+  function onEnd(x: number, _y: number): void {
+    if (!tracking) return;
+    tracking = false;
+
+    const dx    = x - startX;
+    const absDx = Math.abs(dx);
+
+    if (!isVertical) {
+      // Horizontal right swipe → go back
+      if (absDx > 30 && dx > 0) onRight();
+      body.style.transform = '';
+      return;
+    }
+
+    // Snap to nearest row boundary
+    const rh         = rowHeight();
+    const days       = -Math.round(currentDy / rh); // up = negative dy = positive days (future)
+    const clamped    = Math.max(-MAX_DAYS, Math.min(MAX_DAYS, days));
+
+    // Animate snap back to 0
+    body.style.transition = 'transform 0.18s ease';
+    body.style.transform  = 'translateY(0)';
+
+    setTimeout(() => {
+      body.style.transition = '';
+      if (clamped !== 0) {
+        onScroll(clamped);
+      }
+    }, 180);
+  }
+
+  // Touch
   el.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+  el.addEventListener('touchmove',  e => onMove(e.touches[0].clientX, e.touches[0].clientY),  { passive: true });
   el.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
 
-  // マウス
+  // Mouse
   el.addEventListener('mousedown', e => {
     onStart(e.clientX, e.clientY);
-    if (mouseUpHandler) window.removeEventListener('mouseup', mouseUpHandler);
-    mouseUpHandler = (me: MouseEvent) => onEnd(me.clientX, me.clientY);
-    window.addEventListener('mouseup', mouseUpHandler);
+
+    if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler);
+    if (mouseUpHandler)   window.removeEventListener('mouseup',   mouseUpHandler);
+
+    mouseMoveHandler = (me: MouseEvent) => onMove(me.clientX, me.clientY);
+    mouseUpHandler   = (me: MouseEvent) => {
+      if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler);
+      if (mouseUpHandler)   window.removeEventListener('mouseup',   mouseUpHandler);
+      onEnd(me.clientX, me.clientY);
+    };
+
+    window.addEventListener('mousemove', mouseMoveHandler);
+    window.addEventListener('mouseup',   mouseUpHandler);
   });
 }
 
@@ -235,8 +296,9 @@ export function mount(app: HTMLElement): void {
   }
 
   // ─── スワイプ ──────────────────────────────────────
-  attachSwipe(
+  attachScrollSwipe(
     app.querySelector<HTMLElement>('.week-top')!,
+    body,
     (deltaDays) => {
       startDate = addDays(startDate, deltaDays);
       window.history.replaceState(null, '', `/week?start=${startDate}`);
