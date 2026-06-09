@@ -24,4 +24,5 @@ export const schedules = {
     const params = new URLSearchParams({ from, to });
     return api.get<Schedule[]>(`/schedules?${params}`);
   },
+  deleteSchedule: (id: number) => api.delete<null>(`/schedules/${id}`),
 };
