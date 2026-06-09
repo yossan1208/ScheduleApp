@@ -58,10 +58,17 @@ function renderList(area: HTMLElement, list: Schedule[]): void {
 
     const body = document.createElement('div');
     body.className = 'day-card-body';
-    body.innerHTML = `
-      <div class="day-card-title">${s.title}</div>
-      <div class="day-card-time">${formatTime(s.startTime)} - ${formatTime(s.endTime)}</div>
-    `;
+
+    const titleEl = document.createElement('div');
+    titleEl.className   = 'day-card-title';
+    titleEl.textContent = s.title;
+
+    const timeEl = document.createElement('div');
+    timeEl.className   = 'day-card-time';
+    timeEl.textContent = `${formatTime(s.startTime)} - ${formatTime(s.endTime)}`;
+
+    body.appendChild(titleEl);
+    body.appendChild(timeEl);
 
     card.appendChild(bar);
     card.appendChild(body);
@@ -120,10 +127,17 @@ function renderTimeline(area: HTMLElement, list: Schedule[]): void {
 
     const bodyEl = document.createElement('div');
     bodyEl.className = 'day-event-body';
-    bodyEl.innerHTML = `
-      <div class="day-event-title">${s.title}</div>
-      <div class="day-event-time">${formatTime(s.startTime)} - ${formatTime(s.endTime)}</div>
-    `;
+
+    const titleEl = document.createElement('div');
+    titleEl.className   = 'day-event-title';
+    titleEl.textContent = s.title;
+
+    const timeEl = document.createElement('div');
+    timeEl.className   = 'day-event-time';
+    timeEl.textContent = `${formatTime(s.startTime)} - ${formatTime(s.endTime)}`;
+
+    bodyEl.appendChild(titleEl);
+    bodyEl.appendChild(timeEl);
 
     block.appendChild(genreBar);
     block.appendChild(bodyEl);
@@ -133,12 +147,10 @@ function renderTimeline(area: HTMLElement, list: Schedule[]): void {
   area.appendChild(container);
 
   // 自動スクロール位置
-  const earliest = list
+  const startMinutes = list
     .filter(s => s.startTime)
-    .map(s => timeToMinutes(s.startTime!))
-    .reduce((min, m) => Math.min(min, m), list.length > 0 ? Infinity : 9 * 60);
-
-  const scrollTo = earliest === Infinity ? 9 * 60 : earliest;
+    .map(s => timeToMinutes(s.startTime!));
+  const scrollTo = startMinutes.length > 0 ? Math.min(...startMinutes) : 9 * 60;
   // 少し上に余白を持たせて表示
   area.scrollTop = Math.max(0, (scrollTo / 60) * HOUR_HEIGHT - 40);
 }
@@ -182,6 +194,7 @@ function attachSwipe(
 
 // ─── マウント ──────────────────────────────────────────
 export function mount(app: HTMLElement): void {
+  didSwipe = false;
   const dateStr = new URLSearchParams(location.search).get('date') ?? '';
   if (!dateStr) { navigate('/home'); return; }
 
@@ -229,18 +242,22 @@ export function mount(app: HTMLElement): void {
   }
 
   // フェッチ
-  schedules.getSchedules(dateStr, dateStr).then(result => {
-    if (!result.success || !result.data) {
+  schedules.getSchedules(dateStr, dateStr)
+    .then(result => {
+      if (!result.success || !result.data) {
+        area.innerHTML = '<div class="day-empty">予定を取得できませんでした</div>';
+        return;
+      }
+      currentSchedules = result.data.sort((a, b) => {
+        if (!a.startTime) return 1;
+        if (!b.startTime) return -1;
+        return a.startTime.localeCompare(b.startTime);
+      });
+      render();
+    })
+    .catch(() => {
       area.innerHTML = '<div class="day-empty">予定を取得できませんでした</div>';
-      return;
-    }
-    currentSchedules = result.data.sort((a, b) => {
-      if (!a.startTime) return 1;
-      if (!b.startTime) return -1;
-      return a.startTime.localeCompare(b.startTime);
     });
-    render();
-  });
 
   // 予定タップ → SCR-23
   area.addEventListener('click', e => {
