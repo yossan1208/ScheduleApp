@@ -57,7 +57,7 @@
   display: flex;
   align-items: stretch;
   background-color: #2a2a2a;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 0.5rem;
   overflow: hidden;
   cursor: pointer;
