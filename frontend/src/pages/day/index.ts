@@ -383,16 +383,28 @@ export function mount(app: HTMLElement): void {
     }
   }
 
+  const deletingIds = new Set<number>();
+
   // 削除ハンドラ
   function handleDelete(id: number): void {
+    if (deletingIds.has(id)) return;
+    deletingIds.add(id);
+
     schedules.deleteSchedule(id)
       .then(result => {
-        if (!result.success) return;
+        deletingIds.delete(id);
+        if (!result.success) {
+          closeOpenCard();
+          return;
+        }
         currentSchedules = currentSchedules.filter(s => s.id !== id);
         openCard = null;
         render();
       })
-      .catch(() => {/* ignore */});
+      .catch(() => {
+        deletingIds.delete(id);
+        closeOpenCard();
+      });
   }
 
   // フェッチ
