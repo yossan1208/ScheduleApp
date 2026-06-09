@@ -304,7 +304,7 @@ export function mount(app: HTMLElement): void {
       window.history.replaceState(null, '', `/week?start=${startDate}`);
       fetchAndRender().catch(() => {});
     },
-    () => history.back(),
+    () => navigate('/home'),
   );
 
   // ─── 行タップ → SCR-20 ────────────────────────────
