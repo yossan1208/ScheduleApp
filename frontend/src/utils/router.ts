@@ -4,15 +4,17 @@ type PageLoader = () => Promise<{ mount: (app: HTMLElement) => void }>;
 const routes: Record<string, PageLoader> = {
   '/': () => import('../pages/login'),
   '/home': () => import('../pages/home'),
+  '/day': () => import('../pages/day'),
 };
 
 export async function navigate(path: string): Promise<void> {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const loader = routes[path];
+  const pathname = path.split('?')[0];
+  const loader = routes[pathname];
   if (!loader) {
-    app.innerHTML = `<p>画面が見つかりません: ${path}</p>`;
+    app.innerHTML = `<p>画面が見つかりません: ${pathname}</p>`;
     return;
   }
 
@@ -24,5 +26,7 @@ export async function navigate(path: string): Promise<void> {
 }
 
 export function initRouter(): void {
-  window.addEventListener('popstate', () => navigate(location.pathname));
+  window.addEventListener('popstate', () =>
+    navigate(location.pathname + location.search),
+  );
 }
