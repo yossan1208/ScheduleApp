@@ -6,8 +6,14 @@ import { navigate } from '../../utils/router';
 const VIEW_MODE_KEY = 'scr20_view_mode';
 const HOUR_HEIGHT   = 60; // px per hour
 const DAY_NAMES_JA  = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+const DELETE_PX     = 64;
 
 type ViewMode = 'list' | 'timeline';
+
+// ─── モジュール変数 ────────────────────────────────────
+let didSwipe      = false;
+let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
+let openCard: HTMLElement | null = null;
 
 // ─── ユーティリティ ────────────────────────────────────
 function pad(n: number): string {
@@ -39,8 +45,110 @@ function headerText(dateStr: string): { name: string; date: string } {
   };
 }
 
+// ─── カードスワイプ: 開いているカードを閉じる ─────────
+function closeOpenCard(): void {
+  if (!openCard) return;
+  openCard.style.transform = 'translateX(0)';
+  openCard = null;
+}
+
+// ─── カードスワイプ: Apple Music スタイル ────────────
+function attachCardSwipe(
+  card: HTMLElement,
+  deleteBtn: HTMLButtonElement,
+  onDelete: () => void,
+): void {
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+  let isOpen = false;
+  let cardMouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+  let cardMouseUpHandler: ((e: MouseEvent) => void) | null = null;
+
+  function openCard_(): void {
+    closeOpenCard();
+    card.style.transform = `translateX(-${DELETE_PX}px)`;
+    openCard = card;
+    isOpen = true;
+  }
+
+  function closeCard(): void {
+    card.style.transform = 'translateX(0)';
+    if (openCard === card) openCard = null;
+    isOpen = false;
+  }
+
+  // Touch
+  card.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', (e) => {
+    if (!tracking) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (Math.abs(dy) > Math.abs(dx)) { tracking = false; return; }
+    const base = isOpen ? -DELETE_PX : 0;
+    const clamped = Math.min(0, Math.max(-DELETE_PX, base + dx));
+    card.style.transform = `translateX(${clamped}px)`;
+  }, { passive: true });
+
+  card.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (!isOpen && dx < -40) { openCard_(); return; }
+    closeCard();
+  });
+
+  // Mouse (must implement both touch and mouse)
+  card.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    startX = e.clientX;
+    startY = e.clientY;
+    tracking = true;
+
+    if (cardMouseMoveHandler) window.removeEventListener('mousemove', cardMouseMoveHandler);
+    if (cardMouseUpHandler) window.removeEventListener('mouseup', cardMouseUpHandler);
+
+    cardMouseMoveHandler = (me: MouseEvent) => {
+      if (!tracking) return;
+      const dx = me.clientX - startX;
+      const base = isOpen ? -DELETE_PX : 0;
+      const clamped = Math.min(0, Math.max(-DELETE_PX, base + dx));
+      card.style.transform = `translateX(${clamped}px)`;
+    };
+    cardMouseUpHandler = (me: MouseEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = me.clientX - startX;
+      if (!isOpen && dx < -40) { openCard_(); return; }
+      closeCard();
+    };
+    window.addEventListener('mousemove', cardMouseMoveHandler);
+    window.addEventListener('mouseup', cardMouseUpHandler);
+  });
+
+  // Re-tap to close (tap card body while open)
+  card.addEventListener('click', (e) => {
+    if (isOpen) {
+      e.stopPropagation();
+      closeCard();
+    }
+  });
+
+  // Delete button tap
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    onDelete();
+  });
+}
+
 // ─── 描画: リストビュー ────────────────────────────────
-function renderList(area: HTMLElement, list: Schedule[]): void {
+function renderList(area: HTMLElement, list: Schedule[], currentUserId: number, onDelete: (id: number) => void): void {
   area.innerHTML = '';
   if (list.length === 0) {
     area.innerHTML = '<div class="day-empty">予定なし</div>';
@@ -48,14 +156,28 @@ function renderList(area: HTMLElement, list: Schedule[]): void {
   }
 
   list.forEach(s => {
+    const wrap = document.createElement('div');
+    wrap.className = 'day-card-swipe-wrap';
+
+    const isCreator = s.creatorId === currentUserId;
+    let deleteBtn: HTMLButtonElement | null = null;
+    if (isCreator) {
+      deleteBtn = document.createElement('button');
+      deleteBtn.className = 'day-delete-btn';
+      deleteBtn.textContent = '削除';
+      wrap.appendChild(deleteBtn);
+    }
+
     const card = document.createElement('div');
     card.className   = 'day-card';
     card.dataset.id  = String(s.id);
 
+    // genre bar
     const bar = document.createElement('div');
     bar.className = 'day-card-genre-bar';
     bar.style.backgroundColor = s.genre?.colorHex ?? '#9e9e9e';
 
+    // body
     const body = document.createElement('div');
     body.className = 'day-card-body';
 
@@ -69,15 +191,19 @@ function renderList(area: HTMLElement, list: Schedule[]): void {
 
     body.appendChild(titleEl);
     body.appendChild(timeEl);
-
     card.appendChild(bar);
     card.appendChild(body);
-    area.appendChild(card);
+    wrap.appendChild(card);
+    area.appendChild(wrap);
+
+    if (isCreator && deleteBtn) {
+      attachCardSwipe(card, deleteBtn, () => onDelete(s.id));
+    }
   });
 }
 
 // ─── 描画: タイムラインビュー ─────────────────────────
-function renderTimeline(area: HTMLElement, list: Schedule[]): void {
+function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: number, onDelete: (id: number) => void): void {
   area.innerHTML = '';
 
   if (list.length === 0) {
@@ -115,11 +241,25 @@ function renderTimeline(area: HTMLElement, list: Schedule[]): void {
     const top      = (startMin / 60) * HOUR_HEIGHT;
     const height   = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, 20);
 
+    // ラッパーが absolute 配置を担当
+    const wrap = document.createElement('div');
+    wrap.className  = 'day-event-swipe-wrap';
+    wrap.style.top    = `${top}px`;
+    wrap.style.height = `${height}px`;
+
+    const isCreator = s.creatorId === currentUserId;
+    let deleteBtn: HTMLButtonElement | null = null;
+    if (isCreator) {
+      deleteBtn = document.createElement('button');
+      deleteBtn.className = 'day-delete-btn';
+      deleteBtn.textContent = '削除';
+      wrap.appendChild(deleteBtn);
+    }
+
     const block = document.createElement('div');
     block.className  = 'day-event-block';
     block.dataset.id = String(s.id);
-    block.style.top    = `${top}px`;
-    block.style.height = `${height}px`;
+    // NO style.top/height/left/right — CSS and wrapper handle that
 
     const genreBar = document.createElement('div');
     genreBar.className = 'day-event-genre-bar';
@@ -138,10 +278,14 @@ function renderTimeline(area: HTMLElement, list: Schedule[]): void {
 
     bodyEl.appendChild(titleEl);
     bodyEl.appendChild(timeEl);
-
     block.appendChild(genreBar);
     block.appendChild(bodyEl);
-    container.appendChild(block);
+    wrap.appendChild(block);
+    container.appendChild(wrap);
+
+    if (isCreator && deleteBtn) {
+      attachCardSwipe(block, deleteBtn, () => onDelete(s.id));
+    }
   });
 
   area.appendChild(container);
@@ -151,14 +295,10 @@ function renderTimeline(area: HTMLElement, list: Schedule[]): void {
     .filter(s => s.startTime)
     .map(s => timeToMinutes(s.startTime!));
   const scrollTo = startMinutes.length > 0 ? Math.min(...startMinutes) : 9 * 60;
-  // 少し上に余白を持たせて表示
   area.scrollTop = Math.max(0, (scrollTo / 60) * HOUR_HEIGHT - 40);
 }
 
 // ─── スワイプ（左右）─────────────────────────────────
-let didSwipe = false;
-let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
-
 function attachSwipe(
   el: HTMLElement,
   currentDate: string,
@@ -198,6 +338,8 @@ export function mount(app: HTMLElement): void {
   const dateStr = new URLSearchParams(location.search).get('date') ?? '';
   if (!dateStr) { navigate('/home'); return; }
 
+  const currentUserId = parseInt(localStorage.getItem('currentUserId') ?? '0', 10);
+
   const { name, date } = headerText(dateStr);
   const savedMode = (localStorage.getItem(VIEW_MODE_KEY) ?? 'list') as ViewMode;
 
@@ -235,10 +377,22 @@ export function mount(app: HTMLElement): void {
   // 描画
   function render(): void {
     if (currentMode === 'list') {
-      renderList(area, currentSchedules);
+      renderList(area, currentSchedules, currentUserId, handleDelete);
     } else {
-      renderTimeline(area, currentSchedules);
+      renderTimeline(area, currentSchedules, currentUserId, handleDelete);
     }
+  }
+
+  // 削除ハンドラ
+  function handleDelete(id: number): void {
+    schedules.deleteSchedule(id)
+      .then(result => {
+        if (!result.success) return;
+        currentSchedules = currentSchedules.filter(s => s.id !== id);
+        openCard = null;
+        render();
+      })
+      .catch(() => {/* ignore */});
   }
 
   // フェッチ
