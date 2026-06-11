@@ -137,7 +137,7 @@ export function mount(app: HTMLElement): void {
   const monthParam = new URLSearchParams(location.search).get('month');
   if (monthParam) {
     const [y, m] = monthParam.split('-').map(Number);
-    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+    if (!isNaN(y) && !isNaN(m) && y >= 1900 && y <= 2200 && m >= 1 && m <= 12) {
       currentYear  = y;
       currentMonth = m - 1;
     } else {
