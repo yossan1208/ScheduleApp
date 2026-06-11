@@ -105,7 +105,7 @@ export function mount(app: HTMLElement): void {
       <div class="year-header" id="year-header">${currentYear}</div>
       <div class="year-grid"   id="year-grid"></div>
       <div class="year-footer">
-        <button class="year-footer-btn" id="btn-to-home" aria-label="月表示へ">→</button>
+        <button class="nav-arrow-btn" id="btn-to-home" aria-label="月表示へ">→</button>
       </div>
     </div>
   `;

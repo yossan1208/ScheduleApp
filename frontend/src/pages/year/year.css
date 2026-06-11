@@ -98,25 +98,7 @@
 .year-footer {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   padding: 0.75rem 1.5rem 1.5rem;
   flex-shrink: 0;
-}
-
-.year-footer-btn {
-  background: none;
-  border: 1px solid #444;
-  color: #e0e0e0;
-  border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-
-.year-footer-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
 }

@@ -271,6 +271,7 @@ export function mount(app: HTMLElement): void {
         </div>
       </div>
       <div class="week-footer">
+        <button class="nav-arrow-btn" id="btn-to-month" aria-label="月表示へ">←</button>
         <button class="week-today-btn hidden" id="btn-today">Today</button>
         <button class="week-fab" id="btn-notes" aria-label="共有事項">!</button>
         <button class="week-fab" id="btn-add"   aria-label="予定追加">+</button>
@@ -330,6 +331,9 @@ export function mount(app: HTMLElement): void {
   });
 
   // ─── ボタン ───────────────────────────────────────
+  app.querySelector('#btn-to-month')!
+    .addEventListener('click', () => navigate('/home'));
+
   app.querySelector('#btn-gear')!
     .addEventListener('click', () => navigate('/settings'));
 

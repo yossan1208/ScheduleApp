@@ -192,6 +192,11 @@
   flex-shrink: 0;
 }
 
+/* ← ボタンを左端に固定 */
+.week-footer .nav-arrow-btn {
+  margin-right: auto;
+}
+
 /* Today button — only visible when today is outside the window */
 .week-today-btn {
   background: none;
@@ -202,7 +207,6 @@
   font-size: 0.8rem;
   cursor: pointer;
   transition: background 0.15s;
-  margin-right: auto; /* push to left */
 }
 
 .week-today-btn:hover {
