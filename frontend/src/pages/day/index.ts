@@ -425,6 +425,9 @@ export function mount(app: HTMLElement): void {
       area.innerHTML = '<div class="day-empty">予定を取得できませんでした</div>';
     });
 
+  // 開いているスワイプカードを閉じる（別の場所タップ）
+  page.addEventListener('click', () => closeOpenCard());
+
   // 予定タップ → SCR-23
   area.addEventListener('click', e => {
     if (didSwipe) { didSwipe = false; return; }
