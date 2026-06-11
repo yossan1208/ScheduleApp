@@ -1,0 +1,122 @@
+/* === ページレイアウト === */
+.year-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* === ヘッダー（年表示） === */
+.year-header {
+  font-size: 1.75rem;
+  font-weight: 700;
+  padding: 1.25rem 1rem 0.75rem;
+  flex-shrink: 0;
+  line-height: 1.1;
+}
+
+/* === 12ヶ月グリッド === */
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  padding: 0 0.75rem 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* === ミニカレンダーカード === */
+.year-month-card {
+  background-color: #222;
+  border-radius: 6px;
+  padding: 0.4rem 0.35rem 0.45rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.year-month-card:hover {
+  background-color: #2e2e2e;
+}
+
+/* === 月名 === */
+.year-month-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #bbb;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.03em;
+}
+
+/* === 曜日ヘッダー行 === */
+.year-dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.1rem;
+}
+
+.year-dow-cell {
+  font-size: 0.45rem;
+  text-align: center;
+  color: #666;
+}
+
+.year-dow-cell.sun { color: #e57373; }
+.year-dow-cell.sat { color: #64b5f6; }
+
+/* === 日付グリッド === */
+.year-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px 0;
+}
+
+.year-date-cell {
+  font-size: 0.5rem;
+  text-align: center;
+  color: #aaa;
+  padding: 1px 0;
+  border-radius: 50%;
+  line-height: 1.5;
+}
+
+.year-date-cell.empty {
+  color: transparent;
+  pointer-events: none;
+}
+
+.year-date-cell.today {
+  background-color: var(--theme-color, #5c9ad6);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* === フッター === */
+.year-footer {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem 1.5rem;
+  flex-shrink: 0;
+}
+
+.year-footer-btn {
+  background: none;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.year-footer-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
