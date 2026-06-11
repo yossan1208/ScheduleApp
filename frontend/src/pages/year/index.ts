@@ -93,6 +93,8 @@ function renderYear(
 }
 
 // ─── マウント ──────────────────────────────────────────
+let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
+
 export function mount(app: HTMLElement): void {
   const params = new URLSearchParams(location.search);
   let currentYear = parseInt(params.get('year') ?? '', 10);
@@ -126,7 +128,6 @@ export function mount(app: HTMLElement): void {
   let startX = 0;
   let startY = 0;
   let isDragging = false;
-  let mouseUpHandler: ((e: MouseEvent) => void) | null = null;
 
   function onStart(x: number, y: number): void {
     startX = x; startY = y; isDragging = true;
