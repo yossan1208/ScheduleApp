@@ -142,8 +142,8 @@ export function mount(app: HTMLElement): void {
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    // 右スワイプ → /home
-    if (absDx > absDy && absDx > 50 && dx > 0) {
+    // 左スワイプ → /home
+    if (absDx > absDy && absDx > 50 && dx < 0) {
       navigate('/home');
       return;
     }
