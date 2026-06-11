@@ -70,6 +70,13 @@ function attachSwipe(wrapper: HTMLElement, label: HTMLElement): void {
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
+    // 水平スワイプ（右）→ SCR-12（年ビュー）へ
+    if (absDx > absDy && absDx > 50 && dx > 0) {
+      didSwipe = true;
+      navigate(`/year?year=${currentYear}`);
+      return;
+    }
+
     // 水平スワイプ（左）→ SCR-10（週ビュー）へ
     if (absDx > absDy && absDx > 50 && dx < 0) {
       didSwipe = true;
@@ -127,9 +134,22 @@ function attachCellClick(wrapper: HTMLElement): void {
 }
 
 export function mount(app: HTMLElement): void {
-  const now    = new Date();
-  currentYear  = now.getFullYear();
-  currentMonth = now.getMonth();
+  const monthParam = new URLSearchParams(location.search).get('month');
+  if (monthParam) {
+    const [y, m] = monthParam.split('-').map(Number);
+    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+      currentYear  = y;
+      currentMonth = m - 1;
+    } else {
+      const now    = new Date();
+      currentYear  = now.getFullYear();
+      currentMonth = now.getMonth();
+    }
+  } else {
+    const now    = new Date();
+    currentYear  = now.getFullYear();
+    currentMonth = now.getMonth();
+  }
 
   app.innerHTML = `
     <div class="home-page">
@@ -139,7 +159,7 @@ export function mount(app: HTMLElement): void {
       </div>
       <div class="calendar-wrapper" id="calendar-wrapper"></div>
       <div class="view-tab-bar">
-        <button class="tab-btn" disabled>Y</button>
+        <button class="tab-btn" id="btn-year-tab">Y</button>
         <button class="tab-btn active">M</button>
         <button class="tab-btn" id="btn-week-tab">W</button>
       </div>
@@ -158,6 +178,8 @@ export function mount(app: HTMLElement): void {
 
   app.querySelector<HTMLElement>('#btn-week-tab')!
     .addEventListener('click', () => navigate(`/week?start=${todayStr()}`));
+  app.querySelector<HTMLElement>('#btn-year-tab')!
+    .addEventListener('click', () => navigate(`/year?year=${currentYear}`));
   app.querySelector<HTMLElement>('#btn-settings')!
     .addEventListener('click', () => navigate('/settings'));
   app.querySelector<HTMLElement>('#btn-notes')!
