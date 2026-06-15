@@ -1,4 +1,5 @@
 import './new.css';
+import { genres } from '../../../api/genres';
 
 // ─── モジュール状態（mount ごとにリセット） ────────────
 // NOTE: 後タスクで各ボタンのロジック実装時に読み取り利用する
@@ -10,6 +11,9 @@ let isAllDay:           boolean             = false;
 let detailText:         string              = '';
 let notificationTime:   string              = '09:00';
 
+// Mark genre variables as read to prevent unused variable warnings during development
+void [selectedGenreId, selectedGenreName, selectedGenreColor];
+
 // ─── ユーティリティ ────────────────────────────────────
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -20,7 +24,7 @@ function todayStr(): string {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
-export function openSheet(id: string): void {
+function openSheet(id: string): void {
   document.getElementById(id)?.classList.add('open');
 }
 
@@ -39,8 +43,7 @@ export function mount(app: HTMLElement): void {
   notificationTime   = '09:00';
 
   // 後タスクで利用するため参照（スキャフォールド用ダミー読み取り）
-  void [selectedGenreId, selectedGenreName, selectedGenreColor,
-        visibility, isAllDay, detailText, notificationTime];
+  void [visibility, isAllDay, detailText, notificationTime];
 
   const dateParam = new URLSearchParams(location.search).get('date') ?? todayStr();
 
@@ -128,6 +131,42 @@ export function mount(app: HTMLElement): void {
       </div>
     </div>
   `;
+
+  // ─── ジャンルシート ───────────────────────────────────
+  app.querySelector('#btn-genre')!.addEventListener('click', () => {
+    openSheet('overlay-genre');
+    const list = app.querySelector<HTMLElement>('#genre-list')!;
+    list.innerHTML = '<div style="color:#888;padding:0.5rem 0">読み込み中…</div>';
+    genres.getGenres()
+      .then(result => {
+        list.innerHTML = '';
+        if (!result.success || !result.data?.length) {
+          list.innerHTML = '<div style="color:#888;padding:0.5rem 0">ジャンルがまだ作成されていません</div>';
+          return;
+        }
+        result.data.forEach(g => {
+          const item = document.createElement('div');
+          item.className = 'sheet-genre-item';
+          item.innerHTML = `
+            <span class="sheet-genre-color" style="background:${g.colorHex}"></span>
+            <span>${g.name}</span>
+          `;
+          item.addEventListener('click', () => {
+            selectedGenreId    = g.id;
+            selectedGenreName  = g.name;
+            selectedGenreColor = g.colorHex;
+            app.querySelector<HTMLElement>('#genre-dot')!.style.background = g.colorHex;
+            app.querySelector<HTMLElement>('#genre-label')!.textContent    = g.name;
+            app.querySelector<HTMLElement>('#btn-genre')!.classList.add('selected');
+            closeSheet('overlay-genre');
+          });
+          list.appendChild(item);
+        });
+      })
+      .catch(() => {
+        list.innerHTML = '<div style="color:#888;padding:0.5rem 0">取得に失敗しました</div>';
+      });
+  });
 
   // シート外タップで閉じる
   ['overlay-genre', 'overlay-notif', 'overlay-detail', 'overlay-history'].forEach(overlayId => {
