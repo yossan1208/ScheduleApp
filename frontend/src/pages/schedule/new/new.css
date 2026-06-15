@@ -241,7 +241,7 @@
 
 .sheet-overlay.open {
   opacity: 1;
-  pointer-events: all;
+  pointer-events: auto;
 }
 
 .bottom-sheet {
