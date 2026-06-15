@@ -1,5 +1,6 @@
 import './new.css';
 import { genres } from '../../../api/genres';
+import { schedules } from '../../../api/schedules';
 
 // ─── モジュール状態（mount ごとにリセット） ────────────
 // NOTE: 後タスクで各ボタンのロジック実装時に読み取り利用する
@@ -41,9 +42,6 @@ export function mount(app: HTMLElement): void {
   isAllDay           = false;
   detailText         = '';
   notificationTime   = '09:00';
-
-  // 後タスクで利用するため参照（スキャフォールド用ダミー読み取り）
-  void [detailText];
 
   const dateParam = new URLSearchParams(location.search).get('date') ?? todayStr();
 
@@ -219,6 +217,95 @@ export function mount(app: HTMLElement): void {
     visibility = visibility === 'group' ? 'private' : 'group';
     (app.querySelector('#btn-visibility') as HTMLElement).textContent =
       visibility === 'group' ? '👥' : '🔒';
+  });
+
+  // ─── 詳細メモシート ───────────────────────────────────
+  const detailTextarea = app.querySelector<HTMLTextAreaElement>('#detail-textarea')!;
+
+  app.querySelector('#btn-detail')!.addEventListener('click', () => {
+    detailTextarea.value = detailText;
+    openSheet('overlay-detail');
+    setTimeout(() => detailTextarea.focus(), 260);
+  });
+
+  app.querySelector('#btn-detail-confirm')!.addEventListener('click', () => {
+    detailText = detailTextarea.value.trim();
+    const btn = app.querySelector<HTMLElement>('#btn-detail')!;
+    if (detailText) {
+      btn.textContent = `📝 ${detailText.slice(0, 30)}${detailText.length > 30 ? '…' : ''}`;
+      btn.classList.add('filled');
+    } else {
+      btn.textContent = '📝 詳細メモを追加…';
+      btn.classList.remove('filled');
+    }
+    closeSheet('overlay-detail');
+  });
+
+  // ─── 履歴シート ───────────────────────────────────────
+  app.querySelector('#btn-history')!.addEventListener('click', () => {
+    openSheet('overlay-history');
+    const list = app.querySelector<HTMLElement>('#history-list')!;
+    list.innerHTML = '<div style="color:#888;padding:0.5rem 0">読み込み中…</div>';
+
+    schedules.getRecentSchedules()
+      .then(result => {
+        list.innerHTML = '';
+        if (!result.success || !result.data?.length) {
+          list.innerHTML = '<div style="color:#888;padding:0.5rem 0">履歴がありません</div>';
+          return;
+        }
+        result.data.forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'sheet-history-item';
+          const color   = s.genre?.colorHex ?? '#555';
+          const timeStr = s.startTime ? ` ${s.startTime.slice(0, 5)}` : '';
+          item.innerHTML = `
+            <div class="sheet-history-bar" style="background:${color}"></div>
+            <div class="sheet-history-body">
+              <div class="sheet-history-title"></div>
+              <div class="sheet-history-date"></div>
+            </div>
+          `;
+          item.querySelector<HTMLElement>('.sheet-history-title')!.textContent = s.title;
+          item.querySelector<HTMLElement>('.sheet-history-date')!.textContent  = `${s.date}${timeStr}`;
+          item.addEventListener('click', () => {
+            // タイトル反映
+            app.querySelector<HTMLInputElement>('#new-title')!.value = s.title;
+            // ジャンル反映
+            if (s.genre) {
+              selectedGenreId    = s.genre.id;
+              selectedGenreName  = s.genre.name;
+              selectedGenreColor = s.genre.colorHex;
+              app.querySelector<HTMLElement>('#genre-dot')!.style.background = s.genre.colorHex;
+              app.querySelector<HTMLElement>('#genre-label')!.textContent     = s.genre.name;
+              app.querySelector<HTMLElement>('#btn-genre')!.classList.add('selected');
+            }
+            // 時刻反映（日付は反映しない）
+            if (s.startTime) {
+              app.querySelector<HTMLInputElement>('#start-time')!.value = s.startTime.slice(0, 5);
+              if (isAllDay) {
+                isAllDay = false;
+                app.querySelector<HTMLElement>('#btn-all-day')!.classList.remove('active');
+                app.querySelector<HTMLElement>('#btn-set-time')!.classList.add('active');
+                app.querySelector<HTMLElement>('#time-row')!.style.display = '';
+              }
+            }
+            if (s.endTime) {
+              app.querySelector<HTMLInputElement>('#end-time')!.value = s.endTime.slice(0, 5);
+            }
+            // 通知時刻反映
+            if (s.notificationTime) {
+              notificationTime = s.notificationTime.slice(0, 5);
+              app.querySelector('#btn-notif')!.textContent = `🔔 ${notificationTime}`;
+            }
+            closeSheet('overlay-history');
+          });
+          list.appendChild(item);
+        });
+      })
+      .catch(() => {
+        list.innerHTML = '<div style="color:#888;padding:0.5rem 0">取得に失敗しました</div>';
+      });
   });
 
   // キャンセル
