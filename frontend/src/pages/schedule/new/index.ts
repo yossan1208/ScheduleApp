@@ -1,6 +1,7 @@
 import './new.css';
 import { genres } from '../../../api/genres';
-import { schedules } from '../../../api/schedules';
+import { schedules, type CreateSchedulePayload } from '../../../api/schedules';
+import { navigate } from '../../../utils/router';
 
 // ─── モジュール状態（mount ごとにリセット） ────────────
 // NOTE: 後タスクで各ボタンのロジック実装時に読み取り利用する
@@ -12,8 +13,8 @@ let isAllDay:           boolean             = false;
 let detailText:         string              = '';
 let notificationTime:   string              = '09:00';
 
-// Mark genre variables as read to prevent unused variable warnings during development
-void [selectedGenreId, selectedGenreName, selectedGenreColor, isAllDay];
+// selectedGenreName / selectedGenreColor は DOM 反映済み（変数として保持）
+void [selectedGenreName, selectedGenreColor];
 
 // ─── ユーティリティ ────────────────────────────────────
 function pad2(n: number): string {
@@ -305,6 +306,61 @@ export function mount(app: HTMLElement): void {
       })
       .catch(() => {
         list.innerHTML = '<div style="color:#888;padding:0.5rem 0">取得に失敗しました</div>';
+      });
+  });
+
+  // ─── バリデーション + 保存 ────────────────────────────
+  const errorEl = app.querySelector<HTMLElement>('#new-error')!;
+  const saveBtn = app.querySelector<HTMLButtonElement>('#btn-save')!;
+
+  function showError(msg: string): void {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearError(): void {
+    errorEl.classList.add('hidden');
+  }
+
+  saveBtn.addEventListener('click', () => {
+    clearError();
+
+    const title     = app.querySelector<HTMLInputElement>('#new-title')!.value.trim();
+    const eventDate = app.querySelector<HTMLInputElement>('#event-date')!.value;
+    const startTime = isAllDay ? null
+      : (app.querySelector<HTMLInputElement>('#start-time')!.value || null);
+    const endTime   = isAllDay ? null
+      : (app.querySelector<HTMLInputElement>('#end-time')!.value || null);
+
+    if (!title)           { showError('タイトルを入力してください'); return; }
+    if (!selectedGenreId) { showError('ジャンルを選択してください'); return; }
+
+    const payload: CreateSchedulePayload = {
+      date:            eventDate,
+      title,
+      visibility,
+      genreId:         selectedGenreId,
+      startTime,
+      endTime,
+      notificationTime,
+      detail:          detailText || null,
+    };
+
+    saveBtn.disabled = true;
+
+    schedules.createSchedule(payload)
+      .then(result => {
+        saveBtn.disabled = false;
+        if (!result.success || !result.data) {
+          showError(result.error?.message ?? '保存に失敗しました');
+          return;
+        }
+        navigate(`/schedule/${result.data.id}`);
+      })
+      .catch(() => {
+        saveBtn.disabled = false;
+        showError('通信エラーが発生しました');
       });
   });
 
