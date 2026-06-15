@@ -43,7 +43,7 @@ export function mount(app: HTMLElement): void {
   notificationTime   = '09:00';
 
   // 後タスクで利用するため参照（スキャフォールド用ダミー読み取り）
-  void [visibility, detailText, notificationTime];
+  void [detailText];
 
   const dateParam = new URLSearchParams(location.search).get('date') ?? todayStr();
 
@@ -194,6 +194,31 @@ export function mount(app: HTMLElement): void {
     btnAllDay.classList.add('active');
     btnSetTime.classList.remove('active');
     timeRow.style.display = 'none';
+  });
+
+  // ─── 通知時刻シート ───────────────────────────────────
+  const notifInput = app.querySelector<HTMLInputElement>('#notif-input')!;
+  notifInput.value = notificationTime;
+
+  app.querySelector('#btn-notif')!.addEventListener('click', () => {
+    notifInput.value = notificationTime;
+    openSheet('overlay-notif');
+    setTimeout(() => notifInput.focus(), 260);
+  });
+
+  app.querySelector('#btn-notif-confirm')!.addEventListener('click', () => {
+    if (notifInput.value) {
+      notificationTime = notifInput.value;
+      app.querySelector('#btn-notif')!.textContent = `🔔 ${notificationTime}`;
+    }
+    closeSheet('overlay-notif');
+  });
+
+  // ─── Visibility トグル ───────────────────────────────
+  app.querySelector('#btn-visibility')!.addEventListener('click', () => {
+    visibility = visibility === 'group' ? 'private' : 'group';
+    (app.querySelector('#btn-visibility') as HTMLElement).textContent =
+      visibility === 'group' ? '👥' : '🔒';
   });
 
   // キャンセル
