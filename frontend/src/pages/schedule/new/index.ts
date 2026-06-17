@@ -80,7 +80,7 @@ export function mount(app: HTMLElement): void {
 
         <div class="new-row">
           <button class="new-notif-btn" id="btn-notif">🔔 09:00</button>
-          <button class="new-visibility-btn" id="btn-visibility" aria-label="公開範囲">👥</button>
+          <button class="new-visibility-btn" id="btn-visibility" aria-label="公開範囲">👥 グループ</button>
         </div>
 
         <button class="new-detail-btn" id="btn-detail">📝 詳細メモを追加…</button>
@@ -217,7 +217,7 @@ export function mount(app: HTMLElement): void {
   app.querySelector('#btn-visibility')!.addEventListener('click', () => {
     visibility = visibility === 'group' ? 'private' : 'group';
     (app.querySelector('#btn-visibility') as HTMLElement).textContent =
-      visibility === 'group' ? '👥' : '🔒';
+      visibility === 'group' ? '👥 グループ' : '🔒 個人';
   });
 
   // ─── 詳細メモシート ───────────────────────────────────

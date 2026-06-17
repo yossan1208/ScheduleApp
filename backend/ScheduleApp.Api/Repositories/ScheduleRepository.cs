@@ -47,10 +47,10 @@ public class ScheduleRepository(AppDbContext db) : IScheduleRepository
 
     public Task<List<Schedule>> GetRecentByUserAsync(int userId, int count = 5)
         => db.Schedules
-             .Include(s => s.Genre)
-               .ThenInclude(g => g!.Color)
-             .Where(s => !s.IsDeleted && s.CreatorId == userId)
-             .OrderByDescending(s => s.CreatedAt)
-             .Take(count)
-             .ToListAsync();
+            .Include(s => s.Genre)
+            .ThenInclude(g => g!.Color)
+            .Where(s => !s.IsDeleted && s.CreatorId == userId)
+            .OrderByDescending(s => s.CreatedAt)
+            .Take(count)
+            .ToListAsync();
 }
