@@ -46,7 +46,7 @@ export function mount(app: HTMLElement): void {
         ? `${s.startTime.slice(0, 5)}${s.endTime ? ` - ${s.endTime.slice(0, 5)}` : ''}`
         : '終日';
 
-      const storedId     = parseInt(localStorage.getItem('userId') ?? '0', 10);
+      const storedId     = parseInt(localStorage.getItem('currentUserId') ?? '0', 10);
       const creatorLabel = s.creatorId === storedId ? '自分' : '他のメンバー';
 
       const memoBlock = s.detail ? `
