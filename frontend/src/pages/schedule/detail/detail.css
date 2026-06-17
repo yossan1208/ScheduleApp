@@ -1,0 +1,133 @@
+/* === ページ全体 === */
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  user-select: none;
+}
+
+/* === ヘッダー（戻る / 編集ボタン） === */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem 0.5rem;
+}
+
+.detail-nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.detail-nav-btn:hover { opacity: 1; }
+
+/* === メインコンテンツ === */
+.detail-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 3rem;
+  gap: 0.75rem;
+}
+
+/* === タイトル === */
+.detail-title {
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+/* === 時刻 / 日付 === */
+.detail-time {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.detail-date {
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+/* === ジャンルバッジ === */
+.detail-genre-badge {
+  display: inline-block;
+  padding: 0.35rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* === セクション（通知・With） === */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.detail-icon {
+  font-size: 1.2rem;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+}
+
+.detail-info {
+  font-size: 0.95rem;
+}
+
+/* === With セクション === */
+.detail-with-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* === 詳細メモ === */
+.detail-memo {
+  max-width: 90%;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.detail-memo-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* === ローディング / エラー === */
+.detail-loading,
+.detail-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  font-size: 1rem;
+  color: #888;
+  background: #1a1a1a;
+}
