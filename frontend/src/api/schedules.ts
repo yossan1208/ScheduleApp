@@ -40,4 +40,6 @@ export const schedules = {
     api.post<Schedule>('/schedules', payload),
   getRecentSchedules: () =>
     api.get<Schedule[]>('/schedules/recent'),
+  getScheduleById: (id: number) =>
+    api.get<Schedule>(`/schedules/${id}`),
 };
