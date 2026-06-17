@@ -10,6 +10,10 @@ const routes: Record<string, PageLoader> = {
   '/schedule/new': () => import('../pages/schedule/new'),
 };
 
+const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [
+  { pattern: /^\/schedule\/\d+$/, loader: () => import('../pages/schedule/detail') },
+];
+
 export async function navigate(path: string, replace = false): Promise<void> {
   const app = document.getElementById('app');
   if (!app) return;
@@ -21,7 +25,8 @@ export async function navigate(path: string, replace = false): Promise<void> {
     window.history.pushState(null, '', path);
   }
 
-  const loader = routes[pathname];
+  const loader = routes[pathname]
+    ?? dynamicRoutes.find(r => r.pattern.test(pathname))?.loader;
   if (!loader) {
     app.innerHTML = `<p>画面が見つかりません: ${pathname}</p>`;
     return;
