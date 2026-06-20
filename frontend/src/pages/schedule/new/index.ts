@@ -366,5 +366,5 @@ export function mount(app: HTMLElement): void {
 
   // キャンセル
   app.querySelector('#btn-cancel')!
-    .addEventListener('click', () => navigate('/day', true));
+    .addEventListener('click', () => history.back());
 }
