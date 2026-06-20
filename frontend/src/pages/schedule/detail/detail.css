@@ -4,7 +4,7 @@
   flex-direction: column;
   min-height: 100dvh;
   user-select: none;
-  background: #1a1a1a;
+  background: var(--theme-color, #1a1a1a);
   color: #e0e0e0;
 }
 
