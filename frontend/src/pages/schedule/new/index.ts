@@ -356,7 +356,7 @@ export function mount(app: HTMLElement): void {
           showError(result.error?.message ?? '保存に失敗しました');
           return;
         }
-        navigate(`/schedule/${result.data.id}`);
+        navigate(`/schedule/${result.data.id}`, true);
       })
       .catch(() => {
         saveBtn.disabled = false;
@@ -366,5 +366,5 @@ export function mount(app: HTMLElement): void {
 
   // キャンセル
   app.querySelector('#btn-cancel')!
-    .addEventListener('click', () => history.back());
+    .addEventListener('click', () => navigate('/day', true));
 }

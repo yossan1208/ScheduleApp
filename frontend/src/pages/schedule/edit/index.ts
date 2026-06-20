@@ -288,7 +288,7 @@ export function mount(app: HTMLElement): void {
 
       // ─── キャンセル ──────────────────────────────────────
       app.querySelector('#btn-cancel')!
-        .addEventListener('click', () => history.back());
+        .addEventListener('click', () => navigate(`/day?date=${s.date.slice(0, 10)}`, true));
 
       // ─── 削除 ────────────────────────────────────────────
       app.querySelector('#btn-delete')!.addEventListener('click', () => {
@@ -349,7 +349,7 @@ export function mount(app: HTMLElement): void {
               showError(upResult.error?.message ?? '更新に失敗しました');
               return;
             }
-            navigate(`/schedule/${id}`);
+            navigate(`/schedule/${id}`, true);
           })
           .catch(() => {
             saveBtn.disabled = false;
