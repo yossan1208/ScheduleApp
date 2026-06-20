@@ -12,8 +12,18 @@ const routes: Record<string, PageLoader> = {
 
 const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [
   { pattern: /^\/schedule\/\d+\/edit$/, loader: () => import('../pages/schedule/edit') },
-  { pattern: /^\/schedule\/\d+$/, loader: () => import('../pages/schedule/detail') },
+  { pattern: /^\/schedule\/\d+$/,       loader: () => import('../pages/day') },
 ];
+
+let popstateHook: ((path: string) => boolean) | null = null;
+
+export function registerPopstateHook(hook: (path: string) => boolean): void {
+  popstateHook = hook;
+}
+
+export function unregisterPopstateHook(): void {
+  popstateHook = null;
+}
 
 export async function navigate(path: string, replace = false): Promise<void> {
   const app = document.getElementById('app');
@@ -39,8 +49,9 @@ export async function navigate(path: string, replace = false): Promise<void> {
 }
 
 export function initRouter(): void {
-  // popstate (back/forward) は replaceState でコンテンツのみ更新する
-  window.addEventListener('popstate', () =>
-    navigate(location.pathname + location.search, true),
-  );
+  window.addEventListener('popstate', () => {
+    const path = location.pathname + location.search;
+    if (popstateHook && popstateHook(path)) return;
+    navigate(path, true);
+  });
 }
