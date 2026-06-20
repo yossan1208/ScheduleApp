@@ -30,16 +30,20 @@ export interface CreateSchedulePayload {
   detail:           string | null;
 }
 
+export type UpdateSchedulePayload = CreateSchedulePayload;
+
 export const schedules = {
   getSchedules: (from: string, to: string) => {
     const params = new URLSearchParams({ from, to });
     return api.get<Schedule[]>(`/schedules?${params}`);
   },
-  deleteSchedule:     (id: number) => api.delete<null>(`/schedules/${id}`),
-  createSchedule:     (payload: CreateSchedulePayload) =>
+  deleteSchedule:   (id: number) => api.delete<null>(`/schedules/${id}`),
+  createSchedule:   (payload: CreateSchedulePayload) =>
     api.post<Schedule>('/schedules', payload),
   getRecentSchedules: () =>
     api.get<Schedule[]>('/schedules/recent'),
-  getScheduleById: (id: number) =>
+  getScheduleById:  (id: number) =>
     api.get<Schedule>(`/schedules/${id}`),
+  updateSchedule:   (id: number, payload: UpdateSchedulePayload) =>
+    api.put<Schedule>(`/schedules/${id}`, payload),
 };
