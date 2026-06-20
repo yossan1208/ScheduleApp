@@ -4,6 +4,8 @@
   flex-direction: column;
   min-height: 100dvh;
   user-select: none;
+  background: #1a1a1a;
+  color: #e0e0e0;
 }
 
 /* === ヘッダー（戻る / 編集ボタン） === */
@@ -21,6 +23,7 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   line-height: 1;
+  color: rgba(255, 255, 255, 0.8);
   opacity: 0.85;
   transition: opacity 0.15s;
 }
@@ -45,17 +48,20 @@
   margin: 0;
   line-height: 1.25;
   word-break: break-word;
+  color: #ffffff;
 }
 
 /* === 時刻 / 日付 === */
 .detail-time {
   font-size: 1.05rem;
   margin: 0;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .detail-date {
   font-size: 0.9rem;
   margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* === ジャンルバッジ === */
@@ -79,14 +85,17 @@
 
 .detail-icon {
   font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .detail-label {
   font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .detail-info {
   font-size: 0.95rem;
+  color: #e0e0e0;
 }
 
 /* === With セクション === */
@@ -104,6 +113,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* === 詳細メモ === */

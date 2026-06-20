@@ -34,13 +34,7 @@ export function mount(app: HTMLElement): void {
         return;
       }
 
-      const s       = result.data;
-      const bgColor = s.genre?.colorHex ?? '#5c9ad6';
-      const dark    = isDarkColor(bgColor);
-      const text    = dark ? '#ffffff'               : '#1a1a1a';
-      const sub     = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.55)';
-      const badge   = dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
-      const btn     = dark ? 'rgba(255,255,255,0.85)': 'rgba(0,0,0,0.65)';
+      const s = result.data;
 
       const timeStr = s.startTime
         ? `${s.startTime.slice(0, 5)}${s.endTime ? ` - ${s.endTime.slice(0, 5)}` : ''}`
@@ -51,40 +45,40 @@ export function mount(app: HTMLElement): void {
 
       const memoBlock = s.detail ? `
         <div class="detail-section detail-memo">
-          <p class="detail-memo-text" style="color:${sub}">${s.detail.replace(/\n/g, '<br>')}</p>
+          <p class="detail-memo-text">${s.detail.replace(/\n/g, '<br>')}</p>
         </div>
       ` : '';
 
       const genreBadge = s.genre ? `
-        <span class="detail-genre-badge" style="background:${badge}; color:${text}">
+        <span class="detail-genre-badge" style="background:${s.genre.colorHex}; color:${isDarkColor(s.genre.colorHex) ? '#ffffff' : '#1a1a1a'}">
           ${s.genre.name}
         </span>
       ` : '';
 
       app.innerHTML = `
-        <div class="detail-page" style="background:${bgColor}; color:${text}">
+        <div class="detail-page">
           <div class="detail-header">
-            <button class="detail-nav-btn" id="btn-back" style="color:${btn}" aria-label="戻る">←</button>
-            <button class="detail-nav-btn" id="btn-edit" style="color:${btn}" aria-label="編集">✏️</button>
+            <button class="detail-nav-btn" id="btn-back" aria-label="戻る">←</button>
+            <button class="detail-nav-btn" id="btn-edit" aria-label="編集">✏️</button>
           </div>
 
           <div class="detail-body">
             <h1 class="detail-title">${s.title}</h1>
-            <p class="detail-time" style="color:${sub}">${timeStr}</p>
-            <p class="detail-date" style="color:${sub}">${formatDate(s.date)}</p>
+            <p class="detail-time">${timeStr}</p>
+            <p class="detail-date">${formatDate(s.date)}</p>
 
             ${genreBadge}
 
             <div class="detail-section">
-              <span class="detail-icon" style="color:${sub}">🔔</span>
-              <span class="detail-info" style="color:${text}">${s.notificationTime.slice(0, 5)}</span>
+              <span class="detail-icon">🔔</span>
+              <span class="detail-info">${s.notificationTime.slice(0, 5)}</span>
             </div>
 
             <div class="detail-section">
-              <span class="detail-label" style="color:${sub}">With</span>
+              <span class="detail-label">With</span>
               <div class="detail-with-row">
-                <div class="detail-avatar" style="background:${badge}; color:${text}">👤</div>
-                <span class="detail-info" style="color:${text}">${creatorLabel}</span>
+                <div class="detail-avatar">👤</div>
+                <span class="detail-info">${creatorLabel}</span>
               </div>
             </div>
 
