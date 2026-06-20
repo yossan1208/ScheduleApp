@@ -11,6 +11,7 @@ const routes: Record<string, PageLoader> = {
 };
 
 const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [
+  { pattern: /^\/schedule\/\d+\/edit$/, loader: () => import('../pages/schedule/edit') },
   { pattern: /^\/schedule\/\d+$/, loader: () => import('../pages/schedule/detail') },
 ];
 
