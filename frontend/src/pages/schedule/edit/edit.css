@@ -1,0 +1,36 @@
+@import '../new/new.css';
+
+/* === 削除ボタン（フッター中央） === */
+.edit-delete-btn {
+  background: none;
+  border: 1px solid #644;
+  color: #e57373;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.edit-delete-btn:hover { background: rgba(229, 115, 115, 0.12); }
+
+.edit-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === ローディング / エラー（初期フェッチ中） === */
+.detail-loading,
+.detail-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  font-size: 1rem;
+  color: #888;
+  background: #1a1a1a;
+}
