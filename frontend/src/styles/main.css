@@ -43,6 +43,45 @@ body {
   width: 100%;
 }
 
+/* アクション FAB ボタン（SCR-11, SCR-10 の ! + ボタンで共用） */
+.fab {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--theme-color);
+  color: #f0f0f0;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.15s;
+}
+
+.fab:hover { opacity: 0.85; }
+
+/* 画面遷移用矢印ボタン（SCR-12 →, SCR-10 ← で共用） */
+.nav-arrow-btn {
+  background: none;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.nav-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 /* エラーメッセージ */
 .error-message {
   color: var(--error-color);

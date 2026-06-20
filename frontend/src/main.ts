@@ -1,4 +1,4 @@
 import { initRouter, navigate } from './utils/router';
 
 initRouter();
-navigate(location.pathname);
+navigate(location.pathname + location.search);

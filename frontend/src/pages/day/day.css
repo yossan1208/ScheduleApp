@@ -1,0 +1,476 @@
+/* === レイアウト === */
+.day-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* === ヘッダー === */
+.day-header {
+  padding: 1.25rem 1rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.day-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.day-date {
+  font-size: 1rem;
+  color: #aaa;
+  margin-top: 0.2rem;
+}
+
+/* === コンテンツエリア === */
+.day-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 1rem;
+}
+
+.day-section-label {
+  font-size: 0.75rem;
+  color: #888;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.day-schedule-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* === リストビュー: スワイプラッパー === */
+.day-card-swipe-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+/* === リストビュー: 予定カード === */
+.day-card {
+  display: flex;
+  align-items: stretch;
+  background-color: #2a2a2a;
+  overflow: hidden;
+  cursor: pointer;
+  transform: translateX(0);
+  transition: background 0.15s, transform 0.2s ease;
+}
+
+.day-card:hover {
+  background-color: #333;
+}
+
+.day-card-genre-bar {
+  width: 4px;
+  flex-shrink: 0;
+  background-color: #9e9e9e;
+}
+
+.day-card-body {
+  padding: 0.6rem 0.75rem;
+}
+
+.day-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.day-card-time {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: 0.15rem;
+}
+
+/* === 予定なし === */
+.day-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+/* === タイムラインビュー === */
+.day-timeline {
+  position: relative;
+  /* 24時間 × 60px */
+  height: 1440px;
+  padding-left: 2.5rem;
+}
+
+.day-timeline-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.day-timeline-hour {
+  width: 2rem;
+  font-size: 0.65rem;
+  color: #666;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 0.4rem;
+}
+
+.day-timeline-line {
+  flex: 1;
+  border-top: 1px solid #2a2a2a;
+}
+
+/* === タイムラインスワイプラッパー === */
+.day-event-swipe-wrap {
+  position: absolute;
+  left: 2.5rem;
+  right: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/* === タイムラインイベントブロック === */
+.day-event-block {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  background-color: #2a2a2a;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.2s ease;
+  min-height: 20px;
+  transform: translateX(0);
+}
+
+.day-event-block:hover {
+  background-color: #333;
+}
+
+.day-event-genre-bar {
+  width: 4px;
+  flex-shrink: 0;
+  background-color: #9e9e9e;
+}
+
+.day-event-body {
+  padding: 0.3rem 0.5rem;
+  overflow: hidden;
+}
+
+.day-event-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day-event-time {
+  font-size: 0.7rem;
+  color: #aaa;
+}
+
+/* === 時間軸オーバーフローバッジ === */
+.day-event-overflow-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+/* === 削除ボタン（共通） === */
+.day-delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 64px;
+  background-color: #c62828;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* === フッター === */
+.day-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem 1.5rem;
+  flex-shrink: 0;
+}
+
+.day-footer-btn {
+  background: none;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.day-footer-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* トグルスイッチ（ピル形） */
+.day-toggle-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.day-toggle {
+  position: relative;
+  width: 4.5rem;
+  height: 2.75rem;
+  border-radius: 1.375rem;
+  border: 1px solid #444;
+  background-color: #2a2a2a;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+  overflow: hidden;
+}
+
+.day-toggle-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background-color: var(--theme-color, #5c9ad6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: left 0.2s;
+}
+
+/* list モード: サム右寄り */
+.day-toggle[data-mode="list"] .day-toggle-thumb {
+  left: calc(100% - 2.375rem);
+}
+
+/* timeline モード: サム左寄り */
+.day-toggle[data-mode="timeline"] .day-toggle-thumb {
+  left: 0.125rem;
+}
+
+/* ========================================
+   SCR-23 ボトムシート
+   ======================================== */
+
+/* オーバーレイ */
+.day-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  transition: opacity 0.25s ease;
+}
+
+.day-sheet-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* シート本体 */
+.day-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90dvh;
+  background: var(--theme-color, #1a1a1a);
+  border-radius: 1rem 1rem 0 0;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* ドラッグハンドル */
+.day-sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 0.75rem auto 0;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+/* ヘッダー（タイトル + 編集ボタン） */
+.day-sheet-header {
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 1.25rem 0.75rem;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.day-sheet-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  word-break: break-word;
+  text-align: center;
+}
+
+.day-sheet-edit-btn {
+  order: -1;
+  align-self: flex-end;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  transition: opacity 0.15s;
+}
+
+.day-sheet-edit-btn:hover { opacity: 0.7; }
+
+/* ボディ（スクロール可能） */
+.day-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* 時刻 */
+.day-sheet-time {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+/* 日付 */
+.day-sheet-date {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 0.5rem;
+}
+
+/* ジャンルバッジ */
+.day-sheet-genre-badge {
+  display: inline-block;
+  padding: 0.35rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* セクション（アイコン + 情報） */
+.day-sheet-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.day-sheet-icon {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.day-sheet-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.day-sheet-info {
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+
+/* With 行 */
+.day-sheet-with-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.day-sheet-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* メモ */
+.day-sheet-memo {
+  max-width: 90%;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.day-sheet-memo-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.9;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+}
+
+/* ローディング / エラー */
+.day-sheet-loading {
+  font-size: 1rem;
+  color: #888;
+  padding: 2rem;
+  text-align: center;
+}

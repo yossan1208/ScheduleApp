@@ -50,6 +50,7 @@ export function mount(app: HTMLElement): void {
     }
 
     document.documentElement.style.setProperty('--theme-color', result.data.themeColorHex);
+    localStorage.setItem('currentUserId', String(result.data.userId));
 
     navigate('/home');
   });

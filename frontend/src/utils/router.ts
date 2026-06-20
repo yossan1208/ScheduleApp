@@ -3,25 +3,55 @@ type PageLoader = () => Promise<{ mount: (app: HTMLElement) => void }>;
 
 const routes: Record<string, PageLoader> = {
   '/': () => import('../pages/login'),
+  '/home': () => import('../pages/home'),
+  '/day': () => import('../pages/day'),
+  '/week': () => import('../pages/week'),
+  '/year': () => import('../pages/year'),
+  '/schedule/new': () => import('../pages/schedule/new'),
 };
 
-export async function navigate(path: string): Promise<void> {
+const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [
+  { pattern: /^\/schedule\/\d+\/edit$/, loader: () => import('../pages/schedule/edit') },
+  { pattern: /^\/schedule\/\d+$/,       loader: () => import('../pages/day') },
+];
+
+let popstateHook: ((path: string) => boolean) | null = null;
+
+export function registerPopstateHook(hook: (path: string) => boolean): void {
+  popstateHook = hook;
+}
+
+export function unregisterPopstateHook(): void {
+  popstateHook = null;
+}
+
+export async function navigate(path: string, replace = false): Promise<void> {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const loader = routes[path];
+  const pathname = path.split('?')[0];
+  if (replace) {
+    window.history.replaceState(null, '', path);
+  } else {
+    window.history.pushState(null, '', path);
+  }
+
+  const loader = routes[pathname]
+    ?? dynamicRoutes.find(r => r.pattern.test(pathname))?.loader;
   if (!loader) {
-    app.innerHTML = `<p>画面が見つかりません: ${path}</p>`;
+    app.innerHTML = `<p>画面が見つかりません: ${pathname}</p>`;
     return;
   }
 
   const page = await loader();
   app.innerHTML = '';
   page.mount(app);
-
-  window.history.pushState(null, '', path);
 }
 
 export function initRouter(): void {
-  window.addEventListener('popstate', () => navigate(location.pathname));
+  window.addEventListener('popstate', () => {
+    const path = location.pathname + location.search;
+    if (popstateHook && popstateHook(path)) return;
+    navigate(path, true);
+  });
 }
