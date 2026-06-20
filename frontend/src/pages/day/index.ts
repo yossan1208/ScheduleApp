@@ -268,6 +268,97 @@ function renderList(area: HTMLElement, list: Schedule[], currentUserId: number, 
 }
 
 // ─── 描画: タイムラインビュー ─────────────────────────
+// ─── タイムライングリッドレイアウト計算 ──────────────
+interface LayoutEntry {
+  schedule:      Schedule;
+  col:           number;  // 0 | 1 | 2
+  numCols:       number;  // 列数（幅 = 1/numCols）
+  visibleFrom:   number;  // 表示開始（分）
+  overflowBadge: number;  // "+N件" N の値（0 = バッジなし）
+}
+
+interface AssignedEntry {
+  schedule:    Schedule;
+  col:         number;
+  visibleFrom: number;
+  endMin:      number;
+}
+
+function computeLayout(list: Schedule[]): LayoutEntry[] {
+  const active = list
+    .filter(s => s.startTime && s.endTime)
+    .sort((a, b) =>
+      timeToMinutes(a.startTime!) - timeToMinutes(b.startTime!) || a.id - b.id,
+    );
+  if (active.length === 0) return [];
+
+  // ── Pass 1: スイープラインで列割り当て ─────────────
+  type Slot = { schedule: Schedule; endMin: number } | null;
+  const cols: [Slot, Slot, Slot] = [null, null, null];
+  const waiting: Schedule[] = [];
+  const assigned: AssignedEntry[] = [];
+
+  function place(s: Schedule, col: number, visibleFrom: number) {
+    cols[col] = { schedule: s, endMin: timeToMinutes(s.endTime!) };
+    assigned.push({ schedule: s, col, visibleFrom, endMin: timeToMinutes(s.endTime!) });
+  }
+
+  const events: [number, 0 | 1, Schedule][] = [];
+  for (const s of active) {
+    events.push([timeToMinutes(s.startTime!), 0, s]);
+    events.push([timeToMinutes(s.endTime!),   1, s]);
+  }
+  events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+
+  for (const [time, type, s] of events) {
+    if (type === 0) {
+      const fc = cols.findIndex(c => c === null);
+      fc >= 0 ? place(s, fc, time) : waiting.push(s);
+    } else {
+      const ci = cols.findIndex(c => c?.schedule.id === s.id);
+      if (ci < 0) {
+        const wi = waiting.findIndex(w => w.id === s.id);
+        if (wi >= 0) waiting.splice(wi, 1);
+      } else {
+        cols[ci] = null;
+        if (waiting.length > 0) place(waiting.shift()!, ci, time);
+      }
+    }
+  }
+
+  // ── Pass 2: numCols と overflowBadge を後計算 ──────
+  // visibleFrom < endMin の有効エントリのみ対象（零時間スロットを除外）
+  const effective = assigned.filter(e => e.visibleFrom < e.endMin);
+
+  return effective.map(entry => {
+    // 表示期間中に同時表示されるカード数 → 全員一致するので列幅が揃う
+    const overlapAssigned = effective.filter(
+      o => o.visibleFrom < entry.endMin && o.endMin > entry.visibleFrom,
+    );
+    const numCols = Math.min(overlapAssigned.length, 3);
+
+    // 表示できないスケジュール数（active 全体との差）
+    const totalOverlap = active.filter(s => {
+      const sStart = timeToMinutes(s.startTime!);
+      const sEnd   = timeToMinutes(s.endTime!);
+      return sStart < entry.endMin && sEnd > entry.visibleFrom;
+    }).length;
+    const hiddenCount = Math.max(0, totalOverlap - numCols);
+
+    // バッジは最右列カードにのみ表示、かつ非表示スケジュールが存在する場合のみ
+    const isRightmost    = entry.col === numCols - 1;
+    const overflowBadge  = isRightmost && hiddenCount > 0 ? hiddenCount : 0;
+
+    return {
+      schedule: entry.schedule,
+      col:      entry.col,
+      numCols,
+      visibleFrom: entry.visibleFrom,
+      overflowBadge,
+    };
+  });
+}
+
 function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: number, onDelete: (id: number) => void): void {
   area.innerHTML = '';
 
@@ -296,18 +387,22 @@ function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: numb
     container.appendChild(row);
   }
 
-  list.forEach(s => {
-    if (!s.startTime || !s.endTime) return;
-
-    const startMin = timeToMinutes(s.startTime);
-    const endMin   = timeToMinutes(s.endTime);
-    const top      = (startMin / 60) * HOUR_HEIGHT;
-    const height   = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, 20);
+  for (const { schedule: s, col, numCols, visibleFrom, overflowBadge } of computeLayout(list)) {
+    const endMin = timeToMinutes(s.endTime!);
+    const top    = (visibleFrom / 60) * HOUR_HEIGHT;
+    const height = Math.max(((endMin - visibleFrom) / 60) * HOUR_HEIGHT, 20);
 
     const wrap = document.createElement('div');
-    wrap.className  = 'day-event-swipe-wrap';
+    wrap.className    = 'day-event-swipe-wrap';
     wrap.style.top    = `${top}px`;
     wrap.style.height = `${height}px`;
+
+    const GAP        = 4; // px（列間マージン）
+    const totalGap   = (numCols - 1) * GAP;
+    const cardW      = `((100% - 2.5rem) - ${totalGap}px) / ${numCols}`;
+    wrap.style.left  = `calc(2.5rem + ${col} * (${cardW} + ${GAP}px))`;
+    wrap.style.right = 'auto';
+    wrap.style.width = `calc(${cardW})`;
 
     const isCreator = s.creatorId === currentUserId;
     let deleteBtn: HTMLButtonElement | null = null;
@@ -335,19 +430,27 @@ function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: numb
 
     const timeEl = document.createElement('div');
     timeEl.className   = 'day-event-time';
-    timeEl.textContent = `${formatTime(s.startTime)} - ${formatTime(s.endTime)}`;
+    timeEl.textContent = `${formatTime(s.startTime!)} - ${formatTime(s.endTime!)}`;
 
     bodyEl.appendChild(titleEl);
     bodyEl.appendChild(timeEl);
     block.appendChild(genreBar);
     block.appendChild(bodyEl);
+
+    if (overflowBadge > 0) {
+      const badge = document.createElement('div');
+      badge.className   = 'day-event-overflow-badge';
+      badge.textContent = `+${overflowBadge}件`;
+      block.appendChild(badge);
+    }
+
     wrap.appendChild(block);
     container.appendChild(wrap);
 
     if (isCreator && deleteBtn) {
       attachCardSwipe(block, deleteBtn, () => onDelete(s.id));
     }
-  });
+  }
 
   area.appendChild(container);
 
@@ -512,11 +615,8 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
     schedules.getScheduleById(scheduleId)
       .then(result => {
         if (!result.success || !result.data) {
-          sheetBody.innerHTML = '';
-          const errEl = document.createElement('div');
-          errEl.className = 'day-sheet-loading';
-          errEl.textContent = '取得に失敗しました';
-          sheetBody.appendChild(errEl);
+          hideSheetUI();
+          history.replaceState(null, '', `/day?date=${dateStr}`);
           return;
         }
         const s = result.data;
@@ -640,6 +740,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
 
   function handleDelete(id: number): void {
     if (deletingIds.has(id)) return;
+    if (!window.confirm('この予定を削除しますか？')) { closeOpenCard(); return; }
     deletingIds.add(id);
 
     schedules.deleteSchedule(id)

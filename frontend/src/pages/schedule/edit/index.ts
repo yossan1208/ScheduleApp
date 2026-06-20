@@ -21,6 +21,12 @@ function closeSheet(id: string): void {
   document.getElementById(id)?.classList.remove('open');
 }
 
+function showErrorPage(app: HTMLElement, msg: string): void {
+  app.innerHTML = `<div class="detail-error"><span></span><button class="detail-error-btn">ホームに戻る</button></div>`;
+  app.querySelector<HTMLElement>('.detail-error span')!.textContent = msg;
+  app.querySelector('.detail-error-btn')!.addEventListener('click', () => navigate('/month'));
+}
+
 export function mount(app: HTMLElement): void {
   selectedGenreId    = 0;
   selectedGenreName  = '';
@@ -35,7 +41,7 @@ export function mount(app: HTMLElement): void {
   const id    = parseInt(parts[parts.length - 2], 10);
 
   if (!id || isNaN(id)) {
-    app.innerHTML = `<div class="detail-error">予定が見つかりません</div>`;
+    showErrorPage(app, '予定が見つかりません');
     return;
   }
 
@@ -44,7 +50,7 @@ export function mount(app: HTMLElement): void {
   schedules.getScheduleById(id)
     .then(result => {
       if (!result.success || !result.data) {
-        app.innerHTML = `<div class="detail-error">予定が見つかりません</div>`;
+        showErrorPage(app, '予定が見つかりません');
         return;
       }
 
@@ -305,7 +311,7 @@ export function mount(app: HTMLElement): void {
               showError(delResult.error?.message ?? '削除に失敗しました');
               return;
             }
-            navigate(`/day?date=${s.date.slice(0, 10)}`);
+            navigate(`/day?date=${s.date.slice(0, 10)}`, true);
           })
           .catch(() => {
             deleteBtn.disabled = false;
@@ -358,6 +364,6 @@ export function mount(app: HTMLElement): void {
       });
     })
     .catch(() => {
-      app.innerHTML = `<div class="detail-error">取得に失敗しました</div>`;
+      showErrorPage(app, '取得に失敗しました');
     });
 }

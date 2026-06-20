@@ -189,6 +189,21 @@
   color: #aaa;
 }
 
+/* === 時間軸オーバーフローバッジ === */
+.day-event-overflow-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
 /* === 削除ボタン（共通） === */
 .day-delete-btn {
   position: absolute;
@@ -304,7 +319,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  max-height: 80dvh;
+  height: 90dvh;
   background: var(--theme-color, #1a1a1a);
   border-radius: 1rem 1rem 0 0;
   z-index: 101;
@@ -330,10 +345,10 @@
 /* ヘッダー（タイトル + 編集ボタン） */
 .day-sheet-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 1.25rem 0.5rem;
+  flex-direction: column;
+  padding: 0.25rem 1.25rem 0.75rem;
   flex-shrink: 0;
+  gap: 0.5rem;
 }
 
 .day-sheet-title {
@@ -341,18 +356,18 @@
   font-weight: 600;
   color: #ffffff;
   word-break: break-word;
-  flex: 1;
-  margin-right: 0.5rem;
+  text-align: center;
 }
 
 .day-sheet-edit-btn {
+  order: -1;
+  align-self: flex-end;
   background: none;
   border: none;
   font-size: 1.4rem;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.8);
   padding: 0.25rem 0.5rem;
-  flex-shrink: 0;
   line-height: 1;
   transition: opacity 0.15s;
 }

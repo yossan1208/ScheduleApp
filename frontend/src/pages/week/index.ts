@@ -79,6 +79,9 @@ function renderRows(
     schCol.className = 'week-schedules-col';
 
     if (list.length > 0) {
+      const cardsList = document.createElement('div');
+      cardsList.className = 'week-cards-list';
+
       list.slice(0, 2).forEach(s => {
         const card = document.createElement('div');
         card.className = 'week-schedule-card';
@@ -87,20 +90,33 @@ function renderRows(
         bar.className = 'week-schedule-card-bar';
         bar.style.backgroundColor = s.genre?.colorHex ?? '#9e9e9e';
 
+        const body = document.createElement('div');
+        body.className = 'week-schedule-card-body';
+
         const title = document.createElement('div');
         title.className   = 'week-schedule-card-title';
         title.textContent = s.title;
 
+        const time = document.createElement('div');
+        time.className   = 'week-schedule-card-time';
+        time.textContent = s.startTime
+          ? `${s.startTime.slice(0, 5)} ~ ${s.endTime?.slice(0, 5) ?? ''}`
+          : '終日';
+
+        body.appendChild(title);
+        body.appendChild(time);
         card.appendChild(bar);
-        card.appendChild(title);
-        schCol.appendChild(card);
+        card.appendChild(body);
+        cardsList.appendChild(card);
       });
 
+      schCol.appendChild(cardsList);
+
       if (list.length > 2) {
-        const more = document.createElement('div');
-        more.className   = 'week-schedule-more';
-        more.textContent = `+${list.length - 2}件`;
-        schCol.appendChild(more);
+        const badge = document.createElement('div');
+        badge.className   = 'week-count-badge';
+        badge.textContent = `+${list.length - 2}件`;
+        schCol.appendChild(badge);
       }
     }
 
