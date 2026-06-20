@@ -615,7 +615,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
       unregisterPopstateHook();
       return false;
     }
-    const m = path.match(/^\/schedule\/(\d+)/);
+    const m = path.match(/^\/schedule\/(\d+)$/);
     if (m) {
       openScheduleSheet(parseInt(m[1], 10));
       return true;
