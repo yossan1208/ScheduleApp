@@ -1,5 +1,6 @@
 import './detail.css';
 import { schedules } from '../../../api/schedules';
+import { navigate } from '../../../utils/router';
 
 function isDarkColor(hex: string): boolean {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -90,9 +91,8 @@ export function mount(app: HTMLElement): void {
       app.querySelector('#btn-back')!
         .addEventListener('click', () => history.back());
 
-      // SCR-22 未実装のため何もしない
       app.querySelector('#btn-edit')!
-        .addEventListener('click', () => {});
+        .addEventListener('click', () => navigate(`/schedule/${id}/edit`));
     })
     .catch(() => {
       app.innerHTML = `<div class="detail-error">取得に失敗しました</div>`;
