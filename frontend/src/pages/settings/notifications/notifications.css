@@ -1,0 +1,127 @@
+.notifications-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg, #fef9c3);
+}
+
+/* ── Header ── */
+.notifications-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  background: var(--bg, #fef9c3);
+}
+
+.notifications-back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--theme-color, #6366f1);
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.notifications-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--theme-color, #6366f1);
+  margin: 0;
+}
+
+/* ── Loading / Empty ── */
+.notifications-loading,
+.notifications-empty {
+  padding: 24px 20px;
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── List ── */
+.notifications-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.notifications-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notifications-dot {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.notifications-genre-name {
+  flex: 1;
+  font-size: 15px;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Toggle Switch ── */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 26px;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--theme-color, #6366f1);
+}
+
+input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+
+input:disabled + .toggle-slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
