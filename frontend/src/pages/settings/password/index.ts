@@ -7,7 +7,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="password-page">
       <div class="password-header">
         <button class="password-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="password-title">password</h1>
+        <h1 class="password-title">パスワード設定</h1>
       </div>
       <div class="password-form-wrap">
         <div class="password-field">
@@ -55,9 +55,9 @@ export async function mount(app: HTMLElement): Promise<void> {
   btnSubmit.addEventListener('click', async () => {
     errorMsg.textContent = '';
 
-    const currentPassword = inputCurrent.value.trim();
-    const newPassword     = inputNew.value.trim();
-    const confirmPassword = inputConfirm.value.trim();
+    const currentPassword = inputCurrent.value;
+    const newPassword     = inputNew.value;
+    const confirmPassword = inputConfirm.value;
 
     // クライアント側バリデーション
     if (!currentPassword || !newPassword || !confirmPassword) {

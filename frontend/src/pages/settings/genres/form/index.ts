@@ -42,6 +42,12 @@ function renderSwatches(colorItems: ColorItem[], selectedColorId: number | null)
 }
 
 export async function mount(app: HTMLElement): Promise<void> {
+  const role = localStorage.getItem('role');
+  if (role !== '0' && role !== '1') {
+    navigate('/settings');
+    return;
+  }
+
   const editId = parseEditId();
   const isEdit = editId !== null;
   const pageTitle = isEdit ? 'ジャンル編集' : 'ジャンル作成';

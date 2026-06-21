@@ -30,6 +30,7 @@ function renderRows(settings: NotificationSetting[]): string {
           type="checkbox"
           ${s.isEnabled ? 'checked' : ''}
           data-genre-id="${s.genreId}"
+          data-custom-minutes="${s.customNotificationMinutes ?? ''}"
         >
         <span class="toggle-slider"></span>
       </label>
@@ -64,9 +65,11 @@ export async function mount(app: HTMLElement): Promise<void> {
     if (isNaN(genreId)) return;
     input.disabled = true;
     try {
+      const rawMinutes = input.dataset.customMinutes;
+      const customNotificationMinutes = rawMinutes ? parseInt(rawMinutes, 10) : null;
       await notifications.updateSetting(genreId, {
         isEnabled: input.checked,
-        customNotificationMinutes: null,
+        customNotificationMinutes,
       });
     } catch {
       // Revert toggle on error
