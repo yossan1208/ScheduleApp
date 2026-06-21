@@ -74,7 +74,8 @@ export async function mount(app: HTMLElement): Promise<void> {
   if (normalNotes.length > 0) {
     html += `<p class="notes-section-label">ノート</p><div class="notes-list">`;
     for (const note of normalNotes) {
-      html += `<div class="notes-card" data-id="${note.id}" style="border-left-color: ${note.color ?? '#ccc'}">${escHtml(note.name)}</div>`;
+      const safeColor = /^#[0-9a-fA-F]{3,6}$/.test(note.color ?? '') ? note.color : '#ccc';
+      html += `<div class="notes-card" data-id="${note.id}" style="border-left-color: ${safeColor}">${escHtml(note.name)}</div>`;
     }
     html += `</div>`;
   } else if (!systemNote) {
