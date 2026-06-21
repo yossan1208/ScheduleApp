@@ -1,11 +1,10 @@
 import './edit.css';
+import { Editor, type JSONContent } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import { TaskList } from '@tiptap/extension-task-list';
+import { TaskItem } from '@tiptap/extension-task-item';
 import { memos, type MemoBlock } from '../../../../api/notes';
 import { navigate } from '../../../../utils/router';
-
-interface BlockState {
-  type: string;
-  content: string;
-}
 
 function parsePath(): { noteId: number; memoId: number } {
   const m = location.pathname.match(/^\/notes\/(\d+)\/memos\/(\d+)$/);
@@ -21,20 +20,131 @@ function parseCheckbox(content: string | null): { checked: boolean; text: string
   return { checked: false, text: content };
 }
 
-function serializeCheckbox(checked: boolean, text: string): string {
-  return `${checked ? '1' : '0'}:${text}`;
+function extractText(node: Record<string, unknown>): string {
+  if (node.type === 'text') return (node.text as string) ?? '';
+  const children = (node.content as Record<string, unknown>[]) ?? [];
+  return children.map(extractText).join('');
 }
 
-function autoResize(ta: HTMLTextAreaElement): void {
-  ta.style.height = 'auto';
-  ta.style.height = `${ta.scrollHeight}px`;
+function blocksToTiptap(blocks: MemoBlock[]): Record<string, unknown> {
+  const content: Record<string, unknown>[] = [];
+  let i = 0;
+
+  while (i < blocks.length) {
+    const block = blocks[i];
+
+    if (block.type === 'heading') {
+      content.push({
+        type: 'heading',
+        attrs: { level: 1 },
+        content: block.content ? [{ type: 'text', text: block.content }] : [],
+      });
+      i++;
+    } else if (block.type === 'bullet') {
+      const items: Record<string, unknown>[] = [];
+      while (i < blocks.length && blocks[i].type === 'bullet') {
+        items.push({
+          type: 'listItem',
+          content: [{
+            type: 'paragraph',
+            content: blocks[i].content ? [{ type: 'text', text: blocks[i].content }] : [],
+          }],
+        });
+        i++;
+      }
+      content.push({ type: 'bulletList', content: items });
+    } else if (block.type === 'ordered') {
+      const items: Record<string, unknown>[] = [];
+      while (i < blocks.length && blocks[i].type === 'ordered') {
+        items.push({
+          type: 'listItem',
+          content: [{
+            type: 'paragraph',
+            content: blocks[i].content ? [{ type: 'text', text: blocks[i].content }] : [],
+          }],
+        });
+        i++;
+      }
+      content.push({ type: 'orderedList', content: items });
+    } else if (block.type === 'checkbox') {
+      const items: Record<string, unknown>[] = [];
+      while (i < blocks.length && blocks[i].type === 'checkbox') {
+        const { checked, text } = parseCheckbox(blocks[i].content);
+        items.push({
+          type: 'taskItem',
+          attrs: { checked },
+          content: [{
+            type: 'paragraph',
+            content: text ? [{ type: 'text', text }] : [],
+          }],
+        });
+        i++;
+      }
+      content.push({ type: 'taskList', content: items });
+    } else {
+      content.push({
+        type: 'paragraph',
+        content: block.content ? [{ type: 'text', text: block.content }] : [],
+      });
+      i++;
+    }
+  }
+
+  if (content.length === 0) content.push({ type: 'paragraph' });
+  return { type: 'doc', content };
+}
+
+function tiptapToBlocks(
+  doc: Record<string, unknown>,
+): Array<{ type: string; content: string | null; sortOrder: number }> {
+  const result: Array<{ type: string; content: string | null; sortOrder: number }> = [];
+  let order = 0;
+
+  for (const node of (doc.content as Record<string, unknown>[]) ?? []) {
+    switch (node.type) {
+      case 'heading': {
+        const text = extractText(node);
+        result.push({ type: 'heading', content: text || null, sortOrder: order++ });
+        break;
+      }
+      case 'bulletList':
+        for (const item of (node.content as Record<string, unknown>[]) ?? []) {
+          const text = extractText(item);
+          if (text) result.push({ type: 'bullet', content: text, sortOrder: order++ });
+        }
+        break;
+      case 'orderedList':
+        for (const item of (node.content as Record<string, unknown>[]) ?? []) {
+          const text = extractText(item);
+          if (text) result.push({ type: 'ordered', content: text, sortOrder: order++ });
+        }
+        break;
+      case 'taskList':
+        for (const item of (node.content as Record<string, unknown>[]) ?? []) {
+          const checked = (item.attrs as Record<string, boolean>)?.checked ?? false;
+          const text = extractText(item);
+          result.push({
+            type: 'checkbox',
+            content: `${checked ? '1' : '0'}:${text}`,
+            sortOrder: order++,
+          });
+        }
+        break;
+      case 'paragraph': {
+        const text = extractText(node);
+        if (text) result.push({ type: 'bullet', content: text, sortOrder: order++ });
+        break;
+      }
+    }
+  }
+
+  return result;
 }
 
 export async function mount(app: HTMLElement): Promise<void> {
   const { noteId, memoId } = parsePath();
-  let blocks: BlockState[] = [];
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
-  let isImportant = false;
+  let editor: Editor | null = null;
 
   app.innerHTML = `
     <div class="edit-page">
@@ -44,148 +154,103 @@ export async function mount(app: HTMLElement): Promise<void> {
         <button class="edit-delete-btn" id="btn-delete">🗑</button>
       </div>
       <div class="edit-save-status" id="save-status"></div>
-      <div class="edit-blocks" id="blocks-area"><p style="color:#888">読み込み中…</p></div>
+      <div class="edit-editor-wrap">
+        <div class="edit-editor" id="editor-mount"></div>
+      </div>
       <div class="edit-toolbar">
-        <button class="toolbar-btn" data-add="heading">T</button>
-        <button class="toolbar-btn" data-add="bullet">•</button>
-        <button class="toolbar-btn" data-add="ordered">1</button>
-        <button class="toolbar-btn" data-add="checkbox">☐</button>
+        <button class="toolbar-btn" id="tb-heading" title="見出し">H</button>
+        <button class="toolbar-btn" id="tb-bullet"  title="箇条書き">•</button>
+        <button class="toolbar-btn" id="tb-ordered" title="番号付き">1</button>
+        <button class="toolbar-btn" id="tb-task"    title="チェックボックス">☐</button>
       </div>
     </div>
   `;
 
-  const blocksArea  = app.querySelector<HTMLElement>('#blocks-area')!;
-  const saveStatus  = app.querySelector<HTMLElement>('#save-status')!;
-  const deleteBtn   = app.querySelector<HTMLElement>('#btn-delete')!;
+  const saveStatus = app.querySelector<HTMLElement>('#save-status')!;
+  const deleteBtn  = app.querySelector<HTMLElement>('#btn-delete')!;
 
+  // ── 戻るボタン ──────────────────────────────────────────
   app.querySelector('#btn-back')!.addEventListener('click', async () => {
-    if (saveTimer !== null) { clearTimeout(saveTimer); await save(true); }
+    if (saveTimer !== null) { clearTimeout(saveTimer); await flush(); }
+    editor?.destroy();
     navigate(`/notes/${noteId}`);
   });
 
-  deleteBtn.addEventListener('click', async () => {
-    if (!confirm('このメモを削除しますか？')) return;
-    const r = await memos.delete(memoId);
-    if (r.success) navigate(`/notes/${noteId}`, true);
-    else alert('削除に失敗しました');
-  });
-
-  app.querySelector('.edit-toolbar')!.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-add]');
-    if (!btn) return;
-    blocks.push({ type: btn.dataset.add!, content: btn.dataset.add === 'checkbox' ? '0:' : '' });
-    renderBlocks();
-    scheduleSave();
-  });
-
-  // 初期データ取得
+  // ── メモ詳細を取得 ──────────────────────────────────────
   const result = await memos.getDetail(memoId);
   if (!result.success || !result.data) {
-    blocksArea.innerHTML = '<p style="color:#ef4444">メモを取得できませんでした</p>';
+    app.querySelector<HTMLElement>('.edit-editor-wrap')!.innerHTML =
+      '<p style="color:#ef4444;padding:16px">メモを取得できませんでした</p>';
     return;
   }
 
-  isImportant = result.data.isImportant;
+  const { isImportant, blocks } = result.data;
   if (isImportant) deleteBtn.style.display = 'none';
 
-  blocks = result.data.blocks.map((b: MemoBlock) => ({
-    type:    b.type,
-    content: b.content ?? '',
-  }));
+  // ── TipTap 初期化 ────────────────────────────────────────
+  const mountEl = app.querySelector<HTMLElement>('#editor-mount')!;
 
-  renderBlocks();
+  editor = new Editor({
+    element: mountEl,
+    extensions: [
+      StarterKit.configure({ heading: { levels: [1] } }),
+      TaskList,
+      TaskItem.configure({ nested: false }),
+    ],
+    content: blocksToTiptap(blocks) as JSONContent,
+    onUpdate: () => scheduleSave(),
+  });
 
-  function renderBlocks(): void {
-    blocksArea.innerHTML = '';
-    blocks.forEach((block, idx) => {
-      const row = document.createElement('div');
-      row.className = 'block-row';
-      row.dataset.idx = String(idx);
-
-      if (block.type === 'checkbox') {
-        const { checked, text } = parseCheckbox(block.content);
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.className = 'block-checkbox';
-        cb.checked = checked;
-        cb.addEventListener('change', () => {
-          blocks[idx].content = serializeCheckbox(cb.checked, ta.value);
-          scheduleSave();
-        });
-
-        const ta = document.createElement('textarea');
-        ta.className = 'block-input';
-        ta.value = text;
-        ta.rows = 1;
-        ta.addEventListener('input', () => {
-          autoResize(ta);
-          blocks[idx].content = serializeCheckbox(cb.checked, ta.value);
-          handleDelete(ta, idx);
-          scheduleSave();
-        });
-
-        row.appendChild(cb);
-        row.appendChild(ta);
-        setTimeout(() => autoResize(ta), 0);
-
-      } else {
-        const prefix = document.createElement('span');
-        prefix.className = 'block-prefix';
-        if (block.type === 'bullet')  prefix.textContent = '•';
-        if (block.type === 'ordered') {
-          const orderedCount = blocks.slice(0, idx + 1).filter(b => b.type === 'ordered').length;
-          prefix.textContent = `${orderedCount}.`;
-        }
-
-        const ta = document.createElement('textarea');
-        ta.className = `block-input${block.type === 'heading' ? ' heading' : ''}`;
-        ta.value = block.content;
-        ta.rows = 1;
-        ta.addEventListener('input', () => {
-          autoResize(ta);
-          blocks[idx].content = ta.value;
-          handleDelete(ta, idx);
-          scheduleSave();
-        });
-
-        if (block.type !== 'heading') row.appendChild(prefix);
-        row.appendChild(ta);
-        setTimeout(() => autoResize(ta), 0);
-      }
-
-      blocksArea.appendChild(row);
-    });
-
-    // 最後のブロックにフォーカス
-    const inputs = blocksArea.querySelectorAll<HTMLTextAreaElement>('.block-input');
-    if (inputs.length > 0) {
-      const last = inputs[inputs.length - 1];
-      last.focus();
-      last.setSelectionRange(last.value.length, last.value.length);
-    }
+  // ── ツールバー ───────────────────────────────────────────
+  function updateToolbar(): void {
+    app.querySelector('#tb-heading')!.classList.toggle('active', editor!.isActive('heading'));
+    app.querySelector('#tb-bullet')! .classList.toggle('active', editor!.isActive('bulletList'));
+    app.querySelector('#tb-ordered')!.classList.toggle('active', editor!.isActive('orderedList'));
+    app.querySelector('#tb-task')!   .classList.toggle('active', editor!.isActive('taskList'));
   }
 
-  function handleDelete(ta: HTMLTextAreaElement, idx: number): void {
-    if (ta.value === '' && blocks.length > 1) {
-      blocks.splice(idx, 1);
-      renderBlocks();
-    }
-  }
+  editor.on('selectionUpdate', updateToolbar);
+  editor.on('transaction',     updateToolbar);
 
+  app.querySelector('#tb-heading')!.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    editor!.chain().focus().toggleHeading({ level: 1 }).run();
+  });
+  app.querySelector('#tb-bullet')!.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    editor!.chain().focus().toggleBulletList().run();
+  });
+  app.querySelector('#tb-ordered')!.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    editor!.chain().focus().toggleOrderedList().run();
+  });
+  app.querySelector('#tb-task')!.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    editor!.chain().focus().toggleTaskList().run();
+  });
+
+  // ── 削除ボタン ───────────────────────────────────────────
+  deleteBtn.addEventListener('click', async () => {
+    if (!confirm('このメモを削除しますか？')) return;
+    const r = await memos.delete(memoId);
+    if (r.success) { editor?.destroy(); navigate(`/notes/${noteId}`, true); }
+    else alert('削除に失敗しました');
+  });
+
+  // ── 自動保存 ─────────────────────────────────────────────
   function scheduleSave(): void {
     if (saveTimer !== null) clearTimeout(saveTimer);
     saveStatus.textContent = '編集中…';
-    saveTimer = setTimeout(() => save(false), 1500);
+    saveTimer = setTimeout(() => flush().catch(() => {}), 1500);
   }
 
-  async function save(immediate: boolean): Promise<void> {
+  async function flush(): Promise<void> {
     saveTimer = null;
+    if (!editor) return;
     saveStatus.textContent = '保存中…';
-    const payload = {
-      blocks: blocks.map((b, i) => ({ type: b.type, content: b.content || null, sortOrder: i })),
-    };
+    const payload = { blocks: tiptapToBlocks(editor.getJSON() as Record<string, unknown>) };
     const r = await memos.save(memoId, payload);
-    saveStatus.textContent = r.success ? (immediate ? '' : '保存しました') : '保存に失敗';
-    if (!immediate) setTimeout(() => { saveStatus.textContent = ''; }, 2000);
+    saveStatus.textContent = r.success ? '保存しました' : '保存に失敗';
+    setTimeout(() => { saveStatus.textContent = ''; }, 2000);
   }
 }
