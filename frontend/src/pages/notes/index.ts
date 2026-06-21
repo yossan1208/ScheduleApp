@@ -2,6 +2,10 @@ import './notes.css';
 import { notes, memos } from '../../api/notes';
 import { navigate } from '../../utils/router';
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function navigateToSystemNote(noteId: number): Promise<void> {
   const result = await memos.getByNote(noteId);
   if (!result.success || !result.data) return;
@@ -63,14 +67,14 @@ export async function mount(app: HTMLElement): Promise<void> {
   if (systemNote) {
     html += `
       <p class="notes-section-label">重要事項</p>
-      <div class="notes-system-card" data-system-id="${systemNote.id}">${systemNote.name}</div>
+      <div class="notes-system-card" data-system-id="${systemNote.id}">${escHtml(systemNote.name)}</div>
     `;
   }
 
   if (normalNotes.length > 0) {
     html += `<p class="notes-section-label">ノート</p><div class="notes-list">`;
     for (const note of normalNotes) {
-      html += `<div class="notes-card" data-id="${note.id}" style="border-left-color: ${note.color}">${note.name}</div>`;
+      html += `<div class="notes-card" data-id="${note.id}" style="border-left-color: ${note.color ?? '#ccc'}">${escHtml(note.name)}</div>`;
     }
     html += `</div>`;
   } else if (!systemNote) {
