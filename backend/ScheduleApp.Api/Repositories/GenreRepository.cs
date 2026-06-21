@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScheduleApp.Api.Data;
 using ScheduleApp.Api.Models.Entities;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Repositories;
 
@@ -71,6 +72,6 @@ public class GenreRepository(AppDbContext db) : IGenreRepository
             .Where(g => g.Id == id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(g => g.IsDeleted, true)
-                .SetProperty(g => g.DeletedAt, DateTime.UtcNow));
+                .SetProperty(g => g.DeletedAt, JstClock.Now));
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScheduleApp.Api.Data;
 using ScheduleApp.Api.Models.Entities;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Repositories;
 
@@ -46,7 +47,7 @@ public class MemoRepository(AppDbContext db) : IMemoRepository
             .ExecuteUpdateAsync(s => s
                 .SetProperty(m => m.Title,     title != null ? title[..Math.Min(30, title.Length)] : null)
                 .SetProperty(m => m.UpdatedBy, updatedBy)
-                .SetProperty(m => m.UpdatedAt, DateTime.UtcNow));
+                .SetProperty(m => m.UpdatedAt, JstClock.Now));
 
         await db.SaveChangesAsync();
     }

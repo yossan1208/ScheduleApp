@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using ScheduleApp.Api.Models.Dtos;
 using ScheduleApp.Api.Models.Entities;
 using ScheduleApp.Api.Repositories;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Services;
 
@@ -44,7 +45,7 @@ public class AuthService : IAuthService
 
         var token = GenerateJwtToken(user);
 
-        var now = DateTime.UtcNow;
+        var now = JstClock.Now;
         await _sessionRepo.CreateAsync(new Session
         {
             UserId = user.Id,

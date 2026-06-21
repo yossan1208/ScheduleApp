@@ -81,7 +81,7 @@
   position: fixed;
   bottom: 24px;
   left: 16px;
-  right: 80px;
+  right: 152px;
   padding: 12px 16px;
   background: #d1d5db;
   border: none;
@@ -89,6 +89,23 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.memos-nav-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 88px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--theme-color, #6366f1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 10;
 }
 
 .memos-fab {

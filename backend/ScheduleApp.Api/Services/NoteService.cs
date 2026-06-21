@@ -1,6 +1,7 @@
 using ScheduleApp.Api.Models.Dtos;
 using ScheduleApp.Api.Models.Entities;
 using ScheduleApp.Api.Repositories;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Services;
 
@@ -23,7 +24,7 @@ public class NoteService(INoteRepository repo) : INoteService
             Color     = request.Color,
             GroupId   = groupId,
             CreatorId = userId,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = JstClock.Now,
             IsSystem  = false,
         };
 
@@ -40,7 +41,7 @@ public class NoteService(INoteRepository repo) : INoteService
         note.Name      = request.Name;
         note.Color     = request.Color;
         note.UpdatedBy = userId;
-        note.UpdatedAt = DateTime.UtcNow;
+        note.UpdatedAt = JstClock.Now;
 
         await repo.UpdateAsync(note);
         return new NoteResult(MapToResponse(note), null);

@@ -1,17 +1,9 @@
 import './notes.css';
-import { notes, memos } from '../../api/notes';
+import { notes, memos, type MemoBlock } from '../../api/notes';
 import { navigate } from '../../utils/router';
 
 function escHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-async function navigateToSystemNote(noteId: number): Promise<void> {
-  const result = await memos.getByNote(noteId);
-  if (!result.success || !result.data) return;
-  const important = result.data.find(m => m.isImportant);
-  if (!important) return;
-  navigate(`/notes/${noteId}/memos/${important.id}`);
 }
 
 function attachLongPress(el: HTMLElement, onLong: () => void): void {
@@ -24,7 +16,7 @@ function attachLongPress(el: HTMLElement, onLong: () => void): void {
     if (timer !== null) { clearTimeout(timer); timer = null; }
   }
   function tap(): void {
-    if (timer !== null) cancel(); // was not long press — handled by click
+    if (timer !== null) cancel();
   }
 
   el.addEventListener('touchstart',  start,  { passive: true });
@@ -35,6 +27,32 @@ function attachLongPress(el: HTMLElement, onLong: () => void): void {
   el.addEventListener('mouseleave',  cancel);
 }
 
+function hasContent(block: MemoBlock): boolean {
+  if (!block.content) return false;
+  if (block.type === 'checkbox') {
+    const text = block.content.startsWith('1:') ? block.content.slice(2)
+               : block.content.startsWith('0:') ? block.content.slice(2)
+               : block.content;
+    return text.trim().length > 0;
+  }
+  return block.content.trim().length > 0;
+}
+
+function blockToLineHtml(block: MemoBlock): string {
+  switch (block.type) {
+    case 'heading': return escHtml(block.content ?? '');
+    case 'bullet':  return `• ${escHtml(block.content ?? '')}`;
+    case 'ordered': return escHtml(block.content ?? '');
+    case 'checkbox': {
+      if (!block.content) return '';
+      if (block.content.startsWith('1:')) return `☑ ${escHtml(block.content.slice(2))}`;
+      if (block.content.startsWith('0:')) return `☐ ${escHtml(block.content.slice(2))}`;
+      return `☐ ${escHtml(block.content)}`;
+    }
+    default: return escHtml(block.content ?? '');
+  }
+}
+
 export async function mount(app: HTMLElement): Promise<void> {
   app.innerHTML = `
     <div class="notes-page">
@@ -43,11 +61,17 @@ export async function mount(app: HTMLElement): Promise<void> {
       </div>
       <div id="notes-body"><p class="notes-empty">読み込み中…</p></div>
       <button class="notes-archive-btn" id="btn-archive">Archive</button>
+      <button class="notes-nav-btn" id="btn-schedule" aria-label="スケジュールへ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
+          <path d="M8 2v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3V2h-2v2h-4V2H8zM5 10h14v10H5V10zm2 2v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
+        </svg>
+      </button>
       <button class="notes-fab" id="btn-fab" aria-label="ノートを追加">+</button>
     </div>
   `;
 
   app.querySelector('#btn-archive')!.addEventListener('click', () => navigate('/notes/archive'));
+  app.querySelector('#btn-schedule')!.addEventListener('click', () => navigate('/home'));
   app.querySelector('#btn-fab')!.addEventListener('click', () => navigate('/notes/new'));
 
   const result = await notes.getAll();
@@ -58,17 +82,38 @@ export async function mount(app: HTMLElement): Promise<void> {
     return;
   }
 
-  const allNotes = result.data;
+  const allNotes   = result.data;
   const systemNote = allNotes.find(n => n.isSystem);
   const normalNotes = allNotes.filter(n => !n.isSystem);
+
+  // システムノートのメモ内容を取得
+  let systemMemoId: number | null = null;
+  let systemBlocks: MemoBlock[] = [];
+
+  if (systemNote) {
+    const memoListResult = await memos.getByNote(systemNote.id);
+    const importantMemo = memoListResult.data?.find(m => m.isImportant) ?? null;
+    if (importantMemo) {
+      systemMemoId = importantMemo.id;
+      const detailResult = await memos.getDetail(importantMemo.id);
+      systemBlocks = (detailResult.data?.blocks ?? []).filter(hasContent).slice(0, 10);
+    }
+  }
 
   let html = '';
 
   if (systemNote) {
+    const contentHtml = systemBlocks.length > 0
+      ? systemBlocks.map(b =>
+          `<div class="notes-system-line${b.type === 'heading' ? ' notes-system-line--heading' : ''}">${blockToLineHtml(b)}</div>`
+        ).join('')
+      : '';
+
     html += `
-      <p class="notes-section-label">重要事項</p>
-      <div class="notes-system-card" data-system-id="${systemNote.id}">${escHtml(systemNote.name)}</div>
-    `;
+      <div class="notes-system-card" data-system-id="${systemNote.id}">
+        <div class="notes-system-title">重要事項</div>
+        ${contentHtml}
+      </div>`;
   }
 
   if (normalNotes.length > 0) {
@@ -86,12 +131,13 @@ export async function mount(app: HTMLElement): Promise<void> {
 
   if (systemNote) {
     body.querySelector<HTMLElement>(`[data-system-id="${systemNote.id}"]`)!
-      .addEventListener('click', () => navigateToSystemNote(systemNote.id));
+      .addEventListener('click', () => {
+        if (systemMemoId !== null) navigate(`/notes/${systemNote.id}/memos/${systemMemoId}`);
+      });
   }
 
   for (const note of normalNotes) {
     const card = body.querySelector<HTMLElement>(`[data-id="${note.id}"]`)!;
-
     let longPressed = false;
 
     attachLongPress(card, () => {

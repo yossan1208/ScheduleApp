@@ -53,6 +53,13 @@
   background: #fff;
   border-radius: 12px;
   padding: 12px 4px;
+  cursor: text;
+}
+
+.edit-editor {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* TipTap editor */

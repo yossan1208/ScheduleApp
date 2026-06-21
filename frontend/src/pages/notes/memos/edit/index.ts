@@ -145,6 +145,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   const { noteId, memoId } = parsePath();
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
   let editor: Editor | null = null;
+  let backTarget = `/notes/${noteId}`;
 
   app.innerHTML = `
     <div class="edit-page">
@@ -173,7 +174,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   app.querySelector('#btn-back')!.addEventListener('click', async () => {
     if (saveTimer !== null) { clearTimeout(saveTimer); await flush(); }
     editor?.destroy();
-    navigate(`/notes/${noteId}`);
+    navigate(backTarget);
   });
 
   // ── メモ詳細を取得 ──────────────────────────────────────
@@ -185,7 +186,10 @@ export async function mount(app: HTMLElement): Promise<void> {
   }
 
   const { isImportant, blocks } = result.data;
-  if (isImportant) deleteBtn.style.display = 'none';
+  if (isImportant) {
+    deleteBtn.style.display = 'none';
+    backTarget = '/notes';
+  }
 
   // ── TipTap 初期化 ────────────────────────────────────────
   const mountEl = app.querySelector<HTMLElement>('#editor-mount')!;
@@ -199,6 +203,13 @@ export async function mount(app: HTMLElement): Promise<void> {
     ],
     content: blocksToTiptap(blocks) as JSONContent,
     onUpdate: () => scheduleSave(),
+  });
+
+  // テキスト領域より下をタップしたときにフォーカス
+  app.querySelector('.edit-editor-wrap')!.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('.ProseMirror')) {
+      editor?.commands.focus('end');
+    }
   });
 
   // ── ツールバー ───────────────────────────────────────────

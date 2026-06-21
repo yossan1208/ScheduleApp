@@ -36,7 +36,20 @@
       "Bash(bash /Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.0/skills/subagent-driven-development/scripts/review-package a612f489b1017d3516c3e8228ae2b607814c3855 HEAD)",
       "Bash(bash /Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.0/skills/subagent-driven-development/scripts/review-package 406295c84c9f3dcff900b1a52f54f763d76e92ce HEAD)",
       "Bash(curl -s http://localhost:5173)",
-      "Bash(node /tmp/verify-scr23-sheet.cjs)"
+      "Bash(node /tmp/verify-scr23-sheet.cjs)",
+      "Bash(mkdir -p /Users/yoshizawayuki/ScheduleApp/docs/superpowers/plans)",
+      "Bash(ls /Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/)",
+      "Read(//Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/**)",
+      "Bash(/Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /Users/yoshizawayuki/ScheduleApp/docs/superpowers/plans/2026-06-21-note-screens.md 6)",
+      "Bash(git -C /Users/yoshizawayuki/ScheduleApp add frontend/src/pages/notes/memos/edit/index.ts frontend/src/pages/notes/memos/edit/edit.css)",
+      "Bash(git -C /Users/yoshizawayuki/ScheduleApp diff --staged --stat)",
+      "Bash(/Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 4c35e55 HEAD)",
+      "Bash(npm ls *)",
+      "Bash(xargs kill)",
+      "Bash(xargs ls)"
+    ],
+    "additionalDirectories": [
+      "/Users/yoshizawayuki/ScheduleApp/docs/superpowers/plans"
     ]
   }
 }
