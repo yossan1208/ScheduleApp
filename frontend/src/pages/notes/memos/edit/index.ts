@@ -58,8 +58,8 @@ export async function mount(app: HTMLElement): Promise<void> {
   const saveStatus  = app.querySelector<HTMLElement>('#save-status')!;
   const deleteBtn   = app.querySelector<HTMLElement>('#btn-delete')!;
 
-  app.querySelector('#btn-back')!.addEventListener('click', () => {
-    if (saveTimer !== null) { clearTimeout(saveTimer); save(true); }
+  app.querySelector('#btn-back')!.addEventListener('click', async () => {
+    if (saveTimer !== null) { clearTimeout(saveTimer); await save(true); }
     navigate(`/notes/${noteId}`);
   });
 
@@ -132,7 +132,10 @@ export async function mount(app: HTMLElement): Promise<void> {
         const prefix = document.createElement('span');
         prefix.className = 'block-prefix';
         if (block.type === 'bullet')  prefix.textContent = '•';
-        if (block.type === 'ordered') prefix.textContent = `${idx + 1}.`;
+        if (block.type === 'ordered') {
+          const orderedCount = blocks.slice(0, idx + 1).filter(b => b.type === 'ordered').length;
+          prefix.textContent = `${orderedCount}.`;
+        }
 
         const ta = document.createElement('textarea');
         ta.className = `block-input${block.type === 'heading' ? ' heading' : ''}`;
