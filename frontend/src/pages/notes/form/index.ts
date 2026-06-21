@@ -13,7 +13,7 @@ function parseEditId(): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-export function mount(app: HTMLElement): void {
+export async function mount(app: HTMLElement): Promise<void> {
   const editId = parseEditId();
   const isEdit = editId !== null;
   let selectedColor = COLORS[0];
@@ -45,6 +45,22 @@ export function mount(app: HTMLElement): void {
   const palette   = app.querySelector<HTMLElement>('#color-palette')!;
   const submitBtn = app.querySelector<HTMLButtonElement>('#btn-submit')!;
   const errorEl   = app.querySelector<HTMLElement>('#form-error')!;
+
+  // Edit mode: pre-fill with existing note data
+  if (isEdit && editId !== null) {
+    const allNotes = await notes.getAll();
+    if (allNotes.success && allNotes.data) {
+      const existing = allNotes.data.find(n => n.id === editId);
+      if (existing) {
+        nameInput.value = existing.name;
+        // Update selectedColor and mark the matching swatch
+        selectedColor = existing.color;
+        palette.querySelectorAll<HTMLElement>('.color-swatch').forEach(s => {
+          s.classList.toggle('selected', s.dataset.color === existing.color);
+        });
+      }
+    }
+  }
 
   app.querySelector('#btn-back')!.addEventListener('click', () => history.back());
 

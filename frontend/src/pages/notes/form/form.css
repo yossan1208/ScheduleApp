@@ -75,6 +75,11 @@
   transform: scale(1.15);
 }
 
+.color-swatch:focus {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
 .form-submit-btn {
   margin: 8px 16px;
   padding: 14px;
