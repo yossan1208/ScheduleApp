@@ -14,6 +14,9 @@ public class UserSettingRepository(AppDbContext db) : IUserSettingRepository
     public Task<Color?> GetColorByIdAsync(int colorId)
         => db.Colors.FirstOrDefaultAsync(c => c.Id == colorId);
 
+    public Task<bool> IsColorUsedByGenreAsync(int colorId, int groupId)
+        => db.Genres.AnyAsync(g => g.ColorId == colorId && g.GroupId == groupId && !g.IsDeleted);
+
     public Task UpdateUserAsync(User user)
     {
         db.Users.Update(user);

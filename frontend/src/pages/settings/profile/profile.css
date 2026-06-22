@@ -113,6 +113,11 @@
   border-color: #333;
 }
 
+.color-swatch.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* Error message */
 .profile-form-error {
   color: #e53935;

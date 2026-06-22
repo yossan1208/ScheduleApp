@@ -22,20 +22,29 @@ function parseEditId(): number | null {
   return m ? parseInt(m[1], 10) : null;
 }
 
-function renderSwatches(colorItems: ColorItem[], selectedColorId: number | null): string {
+function renderSwatches(
+  colorItems: ColorItem[],
+  selectedColorId: number | null,
+  usedColorIds: Set<number>
+): string {
   return `
     <div class="color-swatches">
       ${colorItems
-        .map(
-          (c) => `
+        .map((c) => {
+          const isUsed = usedColorIds.has(c.colorId);
+          const classes = ['color-swatch'];
+          if (selectedColorId === c.colorId) classes.push('selected');
+          if (isUsed) classes.push('disabled');
+          return `
         <button
           type="button"
-          class="color-swatch${selectedColorId === c.colorId ? ' selected' : ''}"
+          class="${classes.join(' ')}"
           data-color-id="${c.colorId}"
           style="background-color: ${safeColor(c.hexCode)};"
-          aria-label="${escHtml(c.displayName)}"
-        ></button>`
-        )
+          aria-label="${escHtml(c.displayName)}${isUsed ? '（使用中）' : ''}"
+          ${isUsed ? 'disabled' : ''}
+        ></button>`;
+        })
         .join('')}
     </div>
   `;
@@ -70,8 +79,9 @@ export async function mount(app: HTMLElement): Promise<void> {
 
   btnBack.addEventListener('click', () => navigate('/settings/genres'));
 
-  // Fetch colors (and genre data if edit mode)
+  // Fetch colors and genres (genres needed to compute used colors)
   let colorItems: ColorItem[] = [];
+  let usedColorIds = new Set<number>();
   let prefillName = '';
   let prefillColorId: number | null = null;
   let prefillTime = '';
@@ -79,7 +89,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   try {
     const [colorsResult, genresResult] = await Promise.all([
       colors.getAll(),
-      isEdit ? genres.getGenres() : Promise.resolve(null),
+      genres.getGenres(),
     ]);
 
     if (!colorsResult.success || !colorsResult.data) {
@@ -88,11 +98,12 @@ export async function mount(app: HTMLElement): Promise<void> {
     }
     colorItems = colorsResult.data;
 
-    if (isEdit && genresResult) {
-      if (!genresResult.success || !genresResult.data) {
-        loadingMsg.textContent = 'ジャンルデータの取得に失敗しました';
-        return;
-      }
+    if (!genresResult.success || !genresResult.data) {
+      loadingMsg.textContent = 'ジャンルデータの取得に失敗しました';
+      return;
+    }
+
+    if (isEdit) {
       const target = genresResult.data.find((g) => g.id === editId);
       if (!target) {
         loadingMsg.textContent = 'ジャンルが見つかりませんでした';
@@ -101,6 +112,13 @@ export async function mount(app: HTMLElement): Promise<void> {
       prefillName = target.name;
       prefillColorId = target.colorId;
       prefillTime = target.defaultNotificationTime ?? '';
+      // 他ジャンルが使用中の色をグレーアウト（自分自身の色は除外）
+      usedColorIds = new Set(
+        genresResult.data.filter((g) => g.id !== editId).map((g) => g.colorId)
+      );
+    } else {
+      // 作成モード: 全ジャンルの使用中色をグレーアウト
+      usedColorIds = new Set(genresResult.data.map((g) => g.colorId));
     }
   } catch {
     loadingMsg.textContent = 'データの取得に失敗しました';
@@ -129,7 +147,7 @@ export async function mount(app: HTMLElement): Promise<void> {
       <div class="genre-form-field">
         <label class="genre-form-label">色を選択 <span class="genre-form-required">*</span></label>
         <div id="swatches-container">
-          ${renderSwatches(colorItems, selectedColorId)}
+          ${renderSwatches(colorItems, selectedColorId, usedColorIds)}
         </div>
       </div>
 
@@ -165,7 +183,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     const colorId = parseInt(btn.dataset.colorId ?? '', 10);
     if (isNaN(colorId)) return;
     selectedColorId = colorId;
-    swatchesContainer.innerHTML = renderSwatches(colorItems, selectedColorId);
+    swatchesContainer.innerHTML = renderSwatches(colorItems, selectedColorId, usedColorIds);
   });
 
   // Delete button (edit mode only)

@@ -27,6 +27,9 @@ public class UserSettingService(IUserSettingRepository repo) : IUserSettingServi
         if (personalColor is null)
             return new UserProfileResult(null, "USER_COLOR_NOT_FOUND");
 
+        if (user.GroupId.HasValue && await repo.IsColorUsedByGenreAsync(request.PersonalColorId, user.GroupId.Value))
+            return new UserProfileResult(null, "USER_COLOR_CONFLICT");
+
         var themeColor = await repo.GetColorByIdAsync(request.ThemeColorId);
         if (themeColor is null)
             return new UserProfileResult(null, "USER_COLOR_NOT_FOUND");

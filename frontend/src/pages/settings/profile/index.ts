@@ -1,6 +1,7 @@
 import { navigate } from '../../../utils/router';
 import { userSettings, colors } from '../../../api/settings';
 import type { ColorItem } from '../../../api/settings';
+import { genres } from '../../../api/genres';
 import './profile.css';
 
 function escHtml(s: string): string {
@@ -18,21 +19,27 @@ function safeColor(hex: string): string {
 function renderSwatches(
   colorItems: ColorItem[],
   selectedColorId: number | null,
-  dataType: 'personal' | 'theme'
+  dataType: 'personal' | 'theme',
+  usedColorIds: Set<number> = new Set()
 ): string {
   return `
     <div class="color-swatches" data-type="${dataType}">
       ${colorItems
-        .map(
-          (c) => `
+        .map((c) => {
+          const isUsed = usedColorIds.has(c.colorId);
+          const classes = ['color-swatch'];
+          if (selectedColorId === c.colorId) classes.push('selected');
+          if (isUsed) classes.push('disabled');
+          return `
         <button
           type="button"
-          class="color-swatch${selectedColorId === c.colorId ? ' selected' : ''}"
+          class="${classes.join(' ')}"
           data-color-id="${c.colorId}"
           style="background-color: ${safeColor(c.hexCode)};"
-          aria-label="${escHtml(c.displayName)}"
-        ></button>`
-        )
+          aria-label="${escHtml(c.displayName)}${isUsed ? '（使用中）' : ''}"
+          ${isUsed ? 'disabled' : ''}
+        ></button>`;
+        })
         .join('')}
     </div>
   `;
@@ -56,16 +63,18 @@ export async function mount(app: HTMLElement): Promise<void> {
 
   btnBack.addEventListener('click', () => navigate('/settings'));
 
-  // Fetch profile and colors in parallel
+  // Fetch profile, colors, genres in parallel
   let colorItems: ColorItem[] = [];
+  let genreUsedColorIds = new Set<number>();
   let prefillName = '';
   let prefillPersonalColorId: number | null = null;
   let prefillThemeColorId: number | null = null;
 
   try {
-    const [profileResult, colorsResult] = await Promise.all([
+    const [profileResult, colorsResult, genresResult] = await Promise.all([
       userSettings.getProfile(),
       colors.getAll(),
+      genres.getGenres(),
     ]);
 
     if (!profileResult.success || !profileResult.data) {
@@ -81,6 +90,11 @@ export async function mount(app: HTMLElement): Promise<void> {
     prefillPersonalColorId = profileResult.data.personalColorId;
     prefillThemeColorId = profileResult.data.themeColorId;
     colorItems = colorsResult.data;
+
+    // 個人カラー選択時: ジャンルが使用中の色はグレーアウト
+    if (genresResult.success && genresResult.data) {
+      genreUsedColorIds = new Set(genresResult.data.map((g) => g.colorId));
+    }
   } catch {
     loadingMsg.textContent = 'データの取得に失敗しました';
     return;
@@ -114,7 +128,7 @@ export async function mount(app: HTMLElement): Promise<void> {
           個人カラー <span class="profile-form-required">*</span>
         </label>
         <div id="personal-swatches">
-          ${renderSwatches(colorItems, selectedPersonalColorId, 'personal')}
+          ${renderSwatches(colorItems, selectedPersonalColorId, 'personal', genreUsedColorIds)}
         </div>
       </div>
 
@@ -154,7 +168,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     const colorId = parseInt(btn.dataset.colorId ?? '', 10);
     if (isNaN(colorId)) return;
     selectedPersonalColorId = colorId;
-    personalSwatches.innerHTML = renderSwatches(colorItems, selectedPersonalColorId, 'personal');
+    personalSwatches.innerHTML = renderSwatches(colorItems, selectedPersonalColorId, 'personal', genreUsedColorIds);
   });
 
   // Swatch click via event delegation on theme swatches
@@ -207,7 +221,12 @@ export async function mount(app: HTMLElement): Promise<void> {
         alert('設定を保存しました');
         navigate('/settings');
       } else {
-        showError(result.error?.message ?? '更新に失敗しました');
+        const code = result.error?.code;
+        if (code === 'USER_COLOR_CONFLICT') {
+          showError('選択した個人カラーは、すでにジャンルで使用されています');
+        } else {
+          showError(result.error?.message ?? '更新に失敗しました');
+        }
       }
     } catch {
       showError('通信エラーが発生しました');
