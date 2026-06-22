@@ -86,38 +86,6 @@
   border-color: var(--theme-color, #6366f1);
 }
 
-/* Color swatches */
-.color-swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 4px 0;
-}
-
-.color-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  transition: border-color 0.15s, transform 0.1s;
-}
-
-.color-swatch:active {
-  transform: scale(0.9);
-}
-
-.color-swatch.selected {
-  border-color: #333;
-}
-
-.color-swatch.disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
 /* Error message */
 .profile-form-error {
   color: #e53935;

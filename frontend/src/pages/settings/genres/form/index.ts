@@ -3,6 +3,8 @@ import { genres } from '../../../../api/genres';
 import type { CreateGenrePayload, UpdateGenrePayload } from '../../../../api/genres';
 import { colors } from '../../../../api/settings';
 import type { ColorItem } from '../../../../api/settings';
+import { ColorCarousel } from '../../../../components/color-carousel';
+import type { CarouselColor } from '../../../../components/color-carousel';
 import './form.css';
 
 function escHtml(s: string): string {
@@ -13,41 +15,9 @@ function escHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function safeColor(hex: string): string {
-  return /^#[0-9a-fA-F]{3,6}$/.test(hex) ? hex : '#ccc';
-}
-
 function parseEditId(): number | null {
   const m = location.pathname.match(/^\/settings\/genres\/(\d+)\/edit$/);
   return m ? parseInt(m[1], 10) : null;
-}
-
-function renderSwatches(
-  colorItems: ColorItem[],
-  selectedColorId: number | null,
-  usedColorIds: Set<number>
-): string {
-  return `
-    <div class="color-swatches">
-      ${colorItems
-        .map((c) => {
-          const isUsed = usedColorIds.has(c.colorId);
-          const classes = ['color-swatch'];
-          if (selectedColorId === c.colorId) classes.push('selected');
-          if (isUsed) classes.push('disabled');
-          return `
-        <button
-          type="button"
-          class="${classes.join(' ')}"
-          data-color-id="${c.colorId}"
-          style="background-color: ${safeColor(c.hexCode)};"
-          aria-label="${escHtml(c.displayName)}${isUsed ? '（使用中）' : ''}"
-          ${isUsed ? 'disabled' : ''}
-        ></button>`;
-        })
-        .join('')}
-    </div>
-  `;
 }
 
 export async function mount(app: HTMLElement): Promise<void> {
@@ -77,7 +47,12 @@ export async function mount(app: HTMLElement): Promise<void> {
   const loadingMsg = app.querySelector<HTMLParagraphElement>('#loading-msg')!;
   const formBody = app.querySelector<HTMLDivElement>('#form-body')!;
 
-  btnBack.addEventListener('click', () => navigate('/settings/genres'));
+  let carousel: ColorCarousel | null = null;
+
+  btnBack.addEventListener('click', () => {
+    carousel?.destroy();
+    navigate('/settings/genres');
+  });
 
   // Fetch colors and genres (genres needed to compute used colors)
   let colorItems: ColorItem[] = [];
@@ -146,9 +121,7 @@ export async function mount(app: HTMLElement): Promise<void> {
 
       <div class="genre-form-field">
         <label class="genre-form-label">色を選択 <span class="genre-form-required">*</span></label>
-        <div id="swatches-container">
-          ${renderSwatches(colorItems, selectedColorId, usedColorIds)}
-        </div>
+        <div id="swatches-container"></div>
       </div>
 
       <div class="genre-form-field">
@@ -173,17 +146,20 @@ export async function mount(app: HTMLElement): Promise<void> {
     </form>
   `;
 
-  const swatchesContainer = formBody.querySelector<HTMLDivElement>('#swatches-container')!;
+  const swatchContainer = formBody.querySelector<HTMLDivElement>('#swatches-container')!;
   const errorEl = formBody.querySelector<HTMLParagraphElement>('#form-error')!;
 
-  // Swatch click: update selectedColorId and re-render swatches
-  swatchesContainer.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.color-swatch');
-    if (!btn) return;
-    const colorId = parseInt(btn.dataset.colorId ?? '', 10);
-    if (isNaN(colorId)) return;
-    selectedColorId = colorId;
-    swatchesContainer.innerHTML = renderSwatches(colorItems, selectedColorId, usedColorIds);
+  const carouselColors: CarouselColor[] = colorItems.map((c) => ({
+    colorId: c.colorId,
+    hexCode: c.hexCode,
+    displayName: c.displayName,
+    disabled: usedColorIds.has(c.colorId),
+  }));
+  carousel = new ColorCarousel({
+    container: swatchContainer,
+    colors: carouselColors,
+    selectedColorId,
+    onChange: (colorId) => { selectedColorId = colorId; },
   });
 
   // Delete button (edit mode only)
@@ -194,6 +170,7 @@ export async function mount(app: HTMLElement): Promise<void> {
       btnDelete.disabled = true;
       try {
         await genres.delete(editId!);
+        carousel?.destroy();
         navigate('/settings/genres', true);
       } catch {
         btnDelete.disabled = false;
@@ -255,6 +232,7 @@ export async function mount(app: HTMLElement): Promise<void> {
           return;
         }
       }
+      carousel?.destroy();
       navigate('/settings/genres', true);
     } catch {
       showError('通信エラーが発生しました');

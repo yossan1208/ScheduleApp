@@ -2,6 +2,8 @@ import { navigate } from '../../../utils/router';
 import { userSettings, colors } from '../../../api/settings';
 import type { ColorItem } from '../../../api/settings';
 import { genres } from '../../../api/genres';
+import { ColorCarousel } from '../../../components/color-carousel';
+import type { CarouselColor } from '../../../components/color-carousel';
 import './profile.css';
 
 function escHtml(s: string): string {
@@ -10,39 +12,6 @@ function escHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function safeColor(hex: string): string {
-  return /^#[0-9a-fA-F]{3,6}$/.test(hex) ? hex : '#ccc';
-}
-
-function renderSwatches(
-  colorItems: ColorItem[],
-  selectedColorId: number | null,
-  dataType: 'personal' | 'theme',
-  usedColorIds: Set<number> = new Set()
-): string {
-  return `
-    <div class="color-swatches" data-type="${dataType}">
-      ${colorItems
-        .map((c) => {
-          const isUsed = usedColorIds.has(c.colorId);
-          const classes = ['color-swatch'];
-          if (selectedColorId === c.colorId) classes.push('selected');
-          if (isUsed) classes.push('disabled');
-          return `
-        <button
-          type="button"
-          class="${classes.join(' ')}"
-          data-color-id="${c.colorId}"
-          style="background-color: ${safeColor(c.hexCode)};"
-          aria-label="${escHtml(c.displayName)}${isUsed ? '（使用中）' : ''}"
-          ${isUsed ? 'disabled' : ''}
-        ></button>`;
-        })
-        .join('')}
-    </div>
-  `;
 }
 
 export async function mount(app: HTMLElement): Promise<void> {
@@ -61,7 +30,14 @@ export async function mount(app: HTMLElement): Promise<void> {
   const loadingMsg = app.querySelector<HTMLParagraphElement>('#loading-msg')!;
   const profileBody = app.querySelector<HTMLDivElement>('#profile-body')!;
 
-  btnBack.addEventListener('click', () => navigate('/settings'));
+  let personalCarousel: ColorCarousel | null = null;
+  let themeCarousel: ColorCarousel | null = null;
+
+  btnBack.addEventListener('click', () => {
+    personalCarousel?.destroy();
+    themeCarousel?.destroy();
+    navigate('/settings');
+  });
 
   // Fetch profile, colors, genres in parallel
   let colorItems: ColorItem[] = [];
@@ -127,18 +103,14 @@ export async function mount(app: HTMLElement): Promise<void> {
         <label class="profile-form-label">
           個人カラー <span class="profile-form-required">*</span>
         </label>
-        <div id="personal-swatches">
-          ${renderSwatches(colorItems, selectedPersonalColorId, 'personal', genreUsedColorIds)}
-        </div>
+        <div id="personal-swatches"></div>
       </div>
 
       <div class="profile-form-field">
         <label class="profile-form-label">
           テーマカラー <span class="profile-form-required">*</span>
         </label>
-        <div id="theme-swatches">
-          ${renderSwatches(colorItems, selectedThemeColorId, 'theme')}
-        </div>
+        <div id="theme-swatches"></div>
       </div>
 
       <p class="profile-form-error" id="form-error" style="display:none;"></p>
@@ -148,9 +120,34 @@ export async function mount(app: HTMLElement): Promise<void> {
     </form>
   `;
 
-  const personalSwatches = profileBody.querySelector<HTMLDivElement>('#personal-swatches')!;
-  const themeSwatches = profileBody.querySelector<HTMLDivElement>('#theme-swatches')!;
   const errorEl = profileBody.querySelector<HTMLParagraphElement>('#form-error')!;
+
+  // Personal color carousel (disabled = genre-used colors)
+  const personalCarouselColors: CarouselColor[] = colorItems.map((c) => ({
+    colorId: c.colorId,
+    hexCode: c.hexCode,
+    displayName: c.displayName,
+    disabled: genreUsedColorIds.has(c.colorId),
+  }));
+  personalCarousel = new ColorCarousel({
+    container: profileBody.querySelector<HTMLDivElement>('#personal-swatches')!,
+    colors: personalCarouselColors,
+    selectedColorId: selectedPersonalColorId,
+    onChange: (colorId) => { selectedPersonalColorId = colorId; },
+  });
+
+  // Theme color carousel (no restrictions)
+  const themeCarouselColors: CarouselColor[] = colorItems.map((c) => ({
+    colorId: c.colorId,
+    hexCode: c.hexCode,
+    displayName: c.displayName,
+  }));
+  themeCarousel = new ColorCarousel({
+    container: profileBody.querySelector<HTMLDivElement>('#theme-swatches')!,
+    colors: themeCarouselColors,
+    selectedColorId: selectedThemeColorId,
+    onChange: (colorId) => { selectedThemeColorId = colorId; },
+  });
 
   function showError(msg: string): void {
     errorEl.textContent = msg;
@@ -160,26 +157,6 @@ export async function mount(app: HTMLElement): Promise<void> {
   function hideError(): void {
     errorEl.style.display = 'none';
   }
-
-  // Swatch click via event delegation on personal swatches
-  personalSwatches.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.color-swatch');
-    if (!btn) return;
-    const colorId = parseInt(btn.dataset.colorId ?? '', 10);
-    if (isNaN(colorId)) return;
-    selectedPersonalColorId = colorId;
-    personalSwatches.innerHTML = renderSwatches(colorItems, selectedPersonalColorId, 'personal', genreUsedColorIds);
-  });
-
-  // Swatch click via event delegation on theme swatches
-  themeSwatches.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.color-swatch');
-    if (!btn) return;
-    const colorId = parseInt(btn.dataset.colorId ?? '', 10);
-    if (isNaN(colorId)) return;
-    selectedThemeColorId = colorId;
-    themeSwatches.innerHTML = renderSwatches(colorItems, selectedThemeColorId, 'theme');
-  });
 
   // Form submit
   const form = profileBody.querySelector<HTMLFormElement>('#profile-form')!;
@@ -218,6 +195,8 @@ export async function mount(app: HTMLElement): Promise<void> {
 
       if (result.success && result.data) {
         document.documentElement.style.setProperty('--theme-color', result.data.themeColorHex);
+        personalCarousel?.destroy();
+        themeCarousel?.destroy();
         alert('設定を保存しました');
         navigate('/settings');
       } else {
