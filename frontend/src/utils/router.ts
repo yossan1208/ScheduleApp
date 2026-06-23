@@ -17,6 +17,10 @@ const routes: Record<string, PageLoader> = {
   '/settings/notifications': () => import('../pages/settings/notifications'),
   '/settings/genres': () => import('../pages/settings/genres'),
   '/settings/genres/new': () => import('../pages/settings/genres/form'),
+  '/settings/admin': () => import('../pages/settings/admin'),
+  '/settings/admin/users': () => import('../pages/settings/admin/users'),
+  '/settings/admin/users/new': () => import('../pages/settings/admin/users/form'),
+  '/settings/admin/groups/new': () => import('../pages/settings/admin/groups/form'),
 };
 
 const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [

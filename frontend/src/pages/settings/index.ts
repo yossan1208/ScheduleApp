@@ -6,7 +6,7 @@ export function mount(app: HTMLElement): void {
   const isAdmin = role === '0';
 
   const adminItem = isAdmin
-    ? `<li class="settings-menu-item settings-menu-item--disabled" id="item-admin">
+    ? `<li class="settings-menu-item" id="item-admin">
         <span class="settings-menu-label">管理者用設定</span>
         <span class="settings-menu-arrow">›</span>
        </li>`
@@ -46,5 +46,7 @@ export function mount(app: HTMLElement): void {
   app.querySelector('#item-genres')!.addEventListener('click', () => navigate('/settings/genres'));
   app.querySelector('#item-password')!.addEventListener('click', () => navigate('/settings/password'));
 
-  // TODO: SCR-50 — 管理者用設定は現時点では何もしない
+  if (isAdmin) {
+    app.querySelector('#item-admin')!.addEventListener('click', () => navigate('/settings/admin'));
+  }
 }

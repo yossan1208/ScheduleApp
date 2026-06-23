@@ -1,0 +1,97 @@
+.admin-form-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg, #fef9c3);
+}
+
+.admin-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 12px;
+}
+
+.admin-form-back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--theme-color, #6366f1);
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.admin-form-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--theme-color, #6366f1);
+  margin: 0;
+}
+
+.admin-form-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-form-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: var(--theme-color, #6366f1);
+}
+
+.admin-role-options {
+  display: flex;
+  gap: 16px;
+}
+
+.admin-role-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.admin-form-error {
+  color: #ef4444;
+  font-size: 13px;
+  min-height: 18px;
+  padding: 0 20px;
+}
+
+.admin-form-submit-btn {
+  margin: 4px 20px 24px;
+  padding: 14px;
+  background: var(--theme-color, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-form-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

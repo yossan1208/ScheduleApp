@@ -49,6 +49,7 @@ public class MemoRepository(AppDbContext db) : IMemoRepository
                 .SetProperty(m => m.UpdatedBy, updatedBy)
                 .SetProperty(m => m.UpdatedAt, JstClock.Now));
 
+
         await db.SaveChangesAsync();
     }
 
