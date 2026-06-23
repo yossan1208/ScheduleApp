@@ -4,6 +4,7 @@ import type { ColorItem } from '../../../api/settings';
 import { genres } from '../../../api/genres';
 import { ColorCarousel } from '../../../components/color-carousel';
 import type { CarouselColor } from '../../../components/color-carousel';
+import { t, getLang, setLang } from '../../../utils/i18n';
 import './profile.css';
 
 function escHtml(s: string): string {
@@ -19,9 +20,9 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="profile-page">
       <div class="profile-header">
         <button class="profile-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="profile-title">個人設定</h1>
+        <h1 class="profile-title">${t('profile.title')}</h1>
       </div>
-      <p class="profile-loading" id="loading-msg">読み込み中…</p>
+      <p class="profile-loading" id="loading-msg">${t('common.loading')}</p>
       <div class="profile-body" id="profile-body" style="display:none;"></div>
     </div>
   `;
@@ -54,11 +55,11 @@ export async function mount(app: HTMLElement): Promise<void> {
     ]);
 
     if (!profileResult.success || !profileResult.data) {
-      loadingMsg.textContent = 'プロフィールの取得に失敗しました';
+      loadingMsg.textContent = t('common.error.fetch');
       return;
     }
     if (!colorsResult.success || !colorsResult.data) {
-      loadingMsg.textContent = 'カラーデータの取得に失敗しました';
+      loadingMsg.textContent = t('common.error.fetch');
       return;
     }
 
@@ -72,7 +73,7 @@ export async function mount(app: HTMLElement): Promise<void> {
       genreUsedColorIds = new Set(genresResult.data.map((g) => g.colorId));
     }
   } catch {
-    loadingMsg.textContent = 'データの取得に失敗しました';
+    loadingMsg.textContent = t('common.error.fetch');
     return;
   }
 
@@ -87,35 +88,49 @@ export async function mount(app: HTMLElement): Promise<void> {
 
       <div class="profile-form-field">
         <label class="profile-form-label" for="input-name">
-          名前 <span class="profile-form-required">*</span>
+          ${t('profile.label.name')} <span class="profile-form-required">*</span>
         </label>
         <input
           type="text"
           id="input-name"
           class="profile-form-input"
           maxlength="50"
-          placeholder="名前を入力"
+          placeholder="${t('profile.placeholder.name')}"
           value="${escHtml(prefillName)}"
         />
       </div>
 
       <div class="profile-form-field">
         <label class="profile-form-label">
-          個人カラー <span class="profile-form-required">*</span>
+          ${t('profile.label.personalColor')} <span class="profile-form-required">*</span>
         </label>
         <div id="personal-swatches"></div>
       </div>
 
       <div class="profile-form-field">
         <label class="profile-form-label">
-          テーマカラー <span class="profile-form-required">*</span>
+          ${t('profile.label.themeColor')} <span class="profile-form-required">*</span>
         </label>
         <div id="theme-swatches"></div>
       </div>
 
+      <div class="profile-form-field">
+        <label class="profile-form-label">${t('profile.label.language')}</label>
+        <div class="profile-lang-radios">
+          <label class="profile-lang-radio">
+            <input type="radio" name="language" value="ja" ${getLang() === 'ja' ? 'checked' : ''}/>
+            ${t('profile.lang.ja')}
+          </label>
+          <label class="profile-lang-radio">
+            <input type="radio" name="language" value="en" ${getLang() === 'en' ? 'checked' : ''}/>
+            ${t('profile.lang.en')}
+          </label>
+        </div>
+      </div>
+
       <p class="profile-form-error" id="form-error" style="display:none;"></p>
 
-      <button type="submit" class="profile-form-save-btn" id="btn-save">設定する</button>
+      <button type="submit" class="profile-form-save-btn" id="btn-save">${t('profile.save')}</button>
 
     </form>
   `;
@@ -169,18 +184,20 @@ export async function mount(app: HTMLElement): Promise<void> {
     const nameInput = profileBody.querySelector<HTMLInputElement>('#input-name')!;
     const name = nameInput.value.trim();
 
+    const language = (profileBody.querySelector<HTMLInputElement>('input[name="language"]:checked')?.value ?? 'ja') as 'ja' | 'en';
+
     // Validation
     if (!name) {
-      showError('名前を入力してください');
+      showError(t('profile.error.noName'));
       nameInput.focus();
       return;
     }
     if (selectedPersonalColorId === null) {
-      showError('個人カラーを選択してください');
+      showError(t('profile.error.noPersonal'));
       return;
     }
     if (selectedThemeColorId === null) {
-      showError('テーマカラーを選択してください');
+      showError(t('profile.error.noTheme'));
       return;
     }
 
@@ -191,24 +208,26 @@ export async function mount(app: HTMLElement): Promise<void> {
         name,
         personalColorId: selectedPersonalColorId,
         themeColorId: selectedThemeColorId,
+        language,
       });
 
       if (result.success && result.data) {
         document.documentElement.style.setProperty('--theme-color', result.data.themeColorHex);
+        setLang(result.data.language as 'ja' | 'en');
         personalCarousel?.destroy();
         themeCarousel?.destroy();
-        alert('設定を保存しました');
+        alert(t('profile.saved'));
         navigate('/settings');
       } else {
         const code = result.error?.code;
         if (code === 'USER_COLOR_CONFLICT') {
-          showError('選択した個人カラーは、すでにジャンルで使用されています');
+          showError(t('profile.error.colorConflict'));
         } else {
-          showError(result.error?.message ?? '更新に失敗しました');
+          showError(result.error?.message ?? t('profile.error.save'));
         }
       }
     } catch {
-      showError('通信エラーが発生しました');
+      showError(t('common.error.network'));
     } finally {
       btnSave.disabled = false;
     }
