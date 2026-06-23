@@ -1,6 +1,7 @@
 using ScheduleApp.Api.Models.Dtos;
 using ScheduleApp.Api.Models.Entities;
 using ScheduleApp.Api.Repositories;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Services;
 
@@ -51,7 +52,7 @@ public class ScheduleService(IScheduleRepository repo) : IScheduleService
             StartTime        = request.StartTime is null ? null : TimeOnly.Parse(request.StartTime),
             EndTime          = request.EndTime   is null ? null : TimeOnly.Parse(request.EndTime),
             NotificationTime = notificationTime,
-            CreatedAt        = DateTime.UtcNow,
+            CreatedAt        = JstClock.Now,
         };
 
         var created = await repo.CreateAsync(schedule);
@@ -98,7 +99,7 @@ public class ScheduleService(IScheduleRepository repo) : IScheduleService
         if (schedule.CreatorId != userId)
             return new ScheduleResult(null, "SCHEDULE_FORBIDDEN");
 
-        await repo.SoftDeleteAsync(id, DateTime.UtcNow);
+        await repo.SoftDeleteAsync(id, JstClock.Now);
         return new ScheduleResult(null, null);
     }
 

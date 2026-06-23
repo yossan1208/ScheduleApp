@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScheduleApp.Api.Data;
 using ScheduleApp.Api.Models.Entities;
+using ScheduleApp.Api.Utils;
 
 namespace ScheduleApp.Api.Repositories;
 
@@ -39,5 +40,5 @@ public class NoteRepository(AppDbContext db) : INoteRepository
              .Where(n => n.Id == id)
              .ExecuteUpdateAsync(s => s
                  .SetProperty(n => n.IsDeleted, true)
-                 .SetProperty(n => n.DeletedAt, DateTime.UtcNow));
+                 .SetProperty(n => n.DeletedAt, JstClock.Now));
 }

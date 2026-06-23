@@ -1,0 +1,140 @@
+.genre-form-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+/* Header */
+.genre-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.genre-form-back-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #333;
+  line-height: 1;
+}
+
+.genre-form-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+/* Loading */
+.genre-form-loading {
+  padding: 32px 16px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Form body */
+.genre-form-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.genre-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 16px;
+}
+
+/* Field */
+.genre-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.genre-form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.genre-form-required {
+  color: #e53935;
+  margin-left: 2px;
+}
+
+.genre-form-input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #333;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.genre-form-input:focus {
+  border-color: var(--theme-color, #6366f1);
+}
+
+/* Error message */
+.genre-form-error {
+  color: #e53935;
+  font-size: 13px;
+  padding: 8px 12px;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  margin: 0;
+}
+
+/* Save button */
+.genre-form-save-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: var(--theme-color, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.genre-form-save-btn:active,
+.genre-form-save-btn:disabled {
+  opacity: 0.6;
+}
+
+/* Delete button */
+.genre-form-delete-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: none;
+  color: #e53935;
+  border: 1px solid #e53935;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.genre-form-delete-btn:active,
+.genre-form-delete-btn:disabled {
+  opacity: 0.6;
+}

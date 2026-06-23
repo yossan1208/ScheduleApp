@@ -1,0 +1,96 @@
+.genres-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+/* Header */
+.genres-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.genres-back-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #333;
+  line-height: 1;
+}
+
+.genres-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+/* Add button */
+.genres-add-btn {
+  display: block;
+  margin: 16px 16px 0;
+  padding: 12px 16px;
+  background: var(--theme-color, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  width: calc(100% - 32px);
+}
+
+.genres-add-btn:active {
+  opacity: 0.85;
+}
+
+/* Loading / empty */
+.genres-loading,
+.genres-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Cards list */
+.genres-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Genre card */
+.genre-card {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-radius: 10px;
+  min-height: 56px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.genre-card--clickable {
+  cursor: pointer;
+}
+
+.genre-card--clickable:active {
+  opacity: 0.8;
+}
+
+.genre-card-name {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  word-break: break-all;
+}

@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using ScheduleApp.Api.Repositories;
+using ScheduleApp.Api.Utils;
 using System.Text;
 
 namespace ScheduleApp.Api.Middleware;
@@ -45,7 +46,7 @@ public class SessionMiddleware(
             return;
         }
 
-        if (session.ExpiresAt < DateTime.UtcNow)
+        if (session.ExpiresAt < JstClock.Now)
         {
             await sessionRepo.DeleteAsync(session.Id);
             await WriteUnauthorizedAsync(context);
@@ -54,8 +55,8 @@ public class SessionMiddleware(
 
         await sessionRepo.UpdateLastActiveAsync(
             session.Id,
-            expiresAt: DateTime.UtcNow.AddDays(SessionLifetimeDays),
-            lastActiveAt: DateTime.UtcNow);
+            expiresAt: JstClock.Now.AddDays(SessionLifetimeDays),
+            lastActiveAt: JstClock.Now);
 
         var userIdClaim  = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId");
         var roleClaim    = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");

@@ -8,11 +8,24 @@ const routes: Record<string, PageLoader> = {
   '/week': () => import('../pages/week'),
   '/year': () => import('../pages/year'),
   '/schedule/new': () => import('../pages/schedule/new'),
+  '/notes': () => import('../pages/notes'),
+  '/notes/new': () => import('../pages/notes/form'),
+  '/notes/archive': () => import('../pages/notes/archive'),
+  '/settings': () => import('../pages/settings'),
+  '/settings/profile': () => import('../pages/settings/profile'),
+  '/settings/password': () => import('../pages/settings/password'),
+  '/settings/notifications': () => import('../pages/settings/notifications'),
+  '/settings/genres': () => import('../pages/settings/genres'),
+  '/settings/genres/new': () => import('../pages/settings/genres/form'),
 };
 
 const dynamicRoutes: Array<{ pattern: RegExp; loader: PageLoader }> = [
+  { pattern: /^\/settings\/genres\/\d+\/edit$/, loader: () => import('../pages/settings/genres/form') },
   { pattern: /^\/schedule\/\d+\/edit$/, loader: () => import('../pages/schedule/edit') },
   { pattern: /^\/schedule\/\d+$/,       loader: () => import('../pages/day') },
+  { pattern: /^\/notes\/\d+\/edit$/,    loader: () => import('../pages/notes/form') },
+  { pattern: /^\/notes\/\d+\/memos\/\d+$/, loader: () => import('../pages/notes/memos/edit') },
+  { pattern: /^\/notes\/\d+$/,          loader: () => import('../pages/notes/memos') },
 ];
 
 let popstateHook: ((path: string) => boolean) | null = null;
