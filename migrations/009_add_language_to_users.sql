@@ -1,0 +1,2 @@
+ALTER TABLE users
+  ADD language NVARCHAR(10) NOT NULL DEFAULT 'ja';

@@ -38,6 +38,7 @@ public class UserSettingService(IUserSettingRepository repo) : IUserSettingServi
         user.PersonalColorId = request.PersonalColorId;
         user.ThemeColorId    = request.ThemeColorId;
         user.ThemeColor      = themeColor;
+        user.Language        = request.Language;
 
         await repo.UpdateUserAsync(user);
 
@@ -72,5 +73,6 @@ public class UserSettingService(IUserSettingRepository repo) : IUserSettingServi
         PersonalColorHex = personalColor?.HexCode ?? string.Empty,
         ThemeColorId     = user.ThemeColorId,
         ThemeColorHex    = user.ThemeColor?.HexCode ?? string.Empty,
+        Language         = user.Language,
     };
 }

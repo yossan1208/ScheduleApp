@@ -10,4 +10,5 @@ public class UserProfileResponse
     public string PersonalColorHex { get; set; } = string.Empty;
     public int    ThemeColorId     { get; set; }
     public string ThemeColorHex    { get; set; } = string.Empty;
+    public string Language         { get; set; } = "ja";
 }

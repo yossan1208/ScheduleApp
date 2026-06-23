@@ -56,10 +56,11 @@ public class AuthService : IAuthService
 
         var response = new LoginResponse
         {
-            UserId = user.Id,
-            Name = user.Name,
-            Role = user.Role,
-            ThemeColorHex = user.ThemeColor?.HexCode ?? string.Empty
+            UserId        = user.Id,
+            Name          = user.Name,
+            Role          = user.Role,
+            ThemeColorHex = user.ThemeColor?.HexCode ?? string.Empty,
+            Language      = user.Language,
         };
 
         return new LoginResult(response, token, null);

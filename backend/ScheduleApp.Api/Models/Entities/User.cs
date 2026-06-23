@@ -11,6 +11,7 @@ public class User
     public short  Role            { get; set; }
     public int?   GroupId         { get; set; }
     public bool   IsActive        { get; set; } = true;
+    public string Language        { get; set; } = "ja";
 
     public Color? ThemeColor { get; set; }
 }
