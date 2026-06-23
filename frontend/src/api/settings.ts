@@ -18,7 +18,7 @@ export interface UpdateProfilePayload {
   name:            string;
   personalColorId: number;
   themeColorId:    number;
-  language:        string;
+  language?:       string;
 }
 
 // PUT /api/users/me/password リクエスト
