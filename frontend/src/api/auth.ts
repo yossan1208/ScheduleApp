@@ -10,6 +10,7 @@ export interface LoginResponse {
   name: string;
   role: number;
   themeColorHex: string;
+  language: string;
 }
 
 export const auth = {

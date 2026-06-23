@@ -10,6 +10,7 @@ export interface UserProfile {
   personalColorHex: string;
   themeColorId:     number;
   themeColorHex:    string;
+  language:         string;
 }
 
 // PUT /api/users/me リクエスト
@@ -17,6 +18,7 @@ export interface UpdateProfilePayload {
   name:            string;
   personalColorId: number;
   themeColorId:    number;
+  language:        string;
 }
 
 // PUT /api/users/me/password リクエスト

@@ -45,6 +45,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   let prefillName = '';
   let prefillPersonalColorId: number | null = null;
   let prefillThemeColorId: number | null = null;
+  let prefillLanguage = '';
 
   try {
     const [profileResult, colorsResult, genresResult] = await Promise.all([
@@ -65,6 +66,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     prefillName = profileResult.data.name;
     prefillPersonalColorId = profileResult.data.personalColorId;
     prefillThemeColorId = profileResult.data.themeColorId;
+    prefillLanguage = profileResult.data.language;
     colorItems = colorsResult.data;
 
     // 個人カラー選択時: ジャンルが使用中の色はグレーアウト
@@ -191,6 +193,7 @@ export async function mount(app: HTMLElement): Promise<void> {
         name,
         personalColorId: selectedPersonalColorId,
         themeColorId: selectedThemeColorId,
+        language: prefillLanguage,
       });
 
       if (result.success && result.data) {
