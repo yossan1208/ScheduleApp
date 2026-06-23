@@ -46,7 +46,10 @@
       "Bash(/Users/yoshizawayuki/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 4c35e55 HEAD)",
       "Bash(npm ls *)",
       "Bash(xargs kill)",
-      "Bash(xargs ls)"
+      "Bash(xargs ls)",
+      "Bash(git -C /Users/yoshizawayuki/ScheduleApp log --oneline -5)",
+      "Bash(sqlcmd -S localhost,1433 -U sa -P 'ScheduleApp_2024!' -Q \"SELECT colorId, hexCode, displayName FROM colors ORDER BY colorId;\")",
+      "Bash(curl -s http://localhost:5296/api/colors)"
     ],
     "additionalDirectories": [
       "/Users/yoshizawayuki/ScheduleApp/docs/superpowers/plans"
