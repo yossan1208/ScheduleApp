@@ -1,6 +1,7 @@
 import { navigate } from '../../../utils/router';
 import { genres } from '../../../api/genres';
 import type { Genre } from '../../../api/genres';
+import { t } from '../../../utils/i18n';
 import './genres.css';
 
 function escHtml(s: string): string {
@@ -17,7 +18,7 @@ function safeColor(hex: string): string {
 
 function renderCards(genreList: Genre[], canEdit: boolean): string {
   if (genreList.length === 0) {
-    return '<p class="genres-empty">ジャンルがまだ作成されていません</p>';
+    return `<p class="genres-empty">${t('genres.empty')}</p>`;
   }
   return genreList
     .map(
@@ -41,10 +42,10 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="genres-page">
       <div class="genres-header">
         <button class="genres-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="genres-title">ジャンル一覧</h1>
+        <h1 class="genres-title">${t('genres.title')}</h1>
       </div>
-      ${canEdit ? '<button id="btn-add" class="genres-add-btn">+ 新規追加する</button>' : ''}
-      <p class="genres-loading" id="loading-msg">読み込み中…</p>
+      ${canEdit ? `<button id="btn-add" class="genres-add-btn">${t('genres.add')}</button>` : ''}
+      <p class="genres-loading" id="loading-msg">${t('common.loading')}</p>
       <div class="genres-list" id="genres-list" style="display:none;"></div>
     </div>
   `;
@@ -79,9 +80,9 @@ export async function mount(app: HTMLElement): Promise<void> {
     if (result.success && result.data) {
       list.innerHTML = renderCards(result.data, canEdit);
     } else {
-      list.innerHTML = '<p class="genres-empty">データの取得に失敗しました</p>';
+      list.innerHTML = `<p class="genres-empty">${t('genres.error')}</p>`;
     }
   } catch {
-    loadingMsg.textContent = 'データの取得に失敗しました';
+    loadingMsg.textContent = t('genres.error');
   }
 }

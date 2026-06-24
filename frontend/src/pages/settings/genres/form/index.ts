@@ -5,6 +5,7 @@ import { colors } from '../../../../api/settings';
 import type { ColorItem } from '../../../../api/settings';
 import { ColorCarousel } from '../../../../components/color-carousel';
 import type { CarouselColor } from '../../../../components/color-carousel';
+import { t } from '../../../../utils/i18n';
 import './form.css';
 
 function escHtml(s: string): string {
@@ -29,7 +30,7 @@ export async function mount(app: HTMLElement): Promise<void> {
 
   const editId = parseEditId();
   const isEdit = editId !== null;
-  const pageTitle = isEdit ? 'ジャンル編集' : 'ジャンル作成';
+  const pageTitle = isEdit ? t('genres.form.editTitle') : t('genres.form.createTitle');
 
   // Initial loading state
   app.innerHTML = `
@@ -38,7 +39,7 @@ export async function mount(app: HTMLElement): Promise<void> {
         <button class="genre-form-back-btn" id="btn-back" aria-label="戻る">←</button>
         <h1 class="genre-form-title">${escHtml(pageTitle)}</h1>
       </div>
-      <p class="genre-form-loading" id="loading-msg">読み込み中…</p>
+      <p class="genre-form-loading" id="loading-msg">${t('common.loading')}</p>
       <div class="genre-form-body" id="form-body" style="display:none;"></div>
     </div>
   `;
@@ -68,20 +69,20 @@ export async function mount(app: HTMLElement): Promise<void> {
     ]);
 
     if (!colorsResult.success || !colorsResult.data) {
-      loadingMsg.textContent = 'カラーデータの取得に失敗しました';
+      loadingMsg.textContent = t('genres.form.error.colorFetch');
       return;
     }
     colorItems = colorsResult.data;
 
     if (!genresResult.success || !genresResult.data) {
-      loadingMsg.textContent = 'ジャンルデータの取得に失敗しました';
+      loadingMsg.textContent = t('genres.form.error.genreFetch');
       return;
     }
 
     if (isEdit) {
       const target = genresResult.data.find((g) => g.id === editId);
       if (!target) {
-        loadingMsg.textContent = 'ジャンルが見つかりませんでした';
+        loadingMsg.textContent = t('genres.form.error.notFound');
         return;
       }
       prefillName = target.name;
@@ -96,7 +97,7 @@ export async function mount(app: HTMLElement): Promise<void> {
       usedColorIds = new Set(genresResult.data.map((g) => g.colorId));
     }
   } catch {
-    loadingMsg.textContent = 'データの取得に失敗しました';
+    loadingMsg.textContent = t('genres.form.fetchError');
     return;
   }
 
@@ -108,24 +109,24 @@ export async function mount(app: HTMLElement): Promise<void> {
   formBody.innerHTML = `
     <form class="genre-form" id="genre-form" novalidate>
       <div class="genre-form-field">
-        <label class="genre-form-label" for="input-name">ジャンル名 <span class="genre-form-required">*</span></label>
+        <label class="genre-form-label" for="input-name">${t('genres.form.label.name')} <span class="genre-form-required">*</span></label>
         <input
           type="text"
           id="input-name"
           class="genre-form-input"
           maxlength="20"
-          placeholder="ジャンル名を入力"
+          placeholder="${t('genres.form.placeholder.name')}"
           value="${escHtml(prefillName)}"
         />
       </div>
 
       <div class="genre-form-field">
-        <label class="genre-form-label">色を選択 <span class="genre-form-required">*</span></label>
+        <label class="genre-form-label">${t('genres.form.label.color')} <span class="genre-form-required">*</span></label>
         <div id="swatches-container"></div>
       </div>
 
       <div class="genre-form-field">
-        <label class="genre-form-label" for="input-time">デフォルト通知時間（任意）</label>
+        <label class="genre-form-label" for="input-time">${t('genres.form.label.time')}</label>
         <input
           type="time"
           id="input-time"
@@ -136,11 +137,11 @@ export async function mount(app: HTMLElement): Promise<void> {
 
       <p class="genre-form-error" id="form-error" style="display:none;"></p>
 
-      <button type="submit" class="genre-form-save-btn" id="btn-save">保存する</button>
+      <button type="submit" class="genre-form-save-btn" id="btn-save">${isEdit ? t('genres.form.submit.edit') : t('genres.form.submit.create')}</button>
 
       ${
         isEdit
-          ? `<button type="button" class="genre-form-delete-btn" id="btn-delete">このジャンルを削除する</button>`
+          ? `<button type="button" class="genre-form-delete-btn" id="btn-delete">${t('genres.form.delete')}</button>`
           : ''
       }
     </form>
@@ -166,7 +167,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   if (isEdit) {
     const btnDelete = formBody.querySelector<HTMLButtonElement>('#btn-delete')!;
     btnDelete.addEventListener('click', async () => {
-      if (!confirm('このジャンルを削除しますか？')) return;
+      if (!confirm(t('genres.form.deleteConfirm'))) return;
       btnDelete.disabled = true;
       try {
         await genres.delete(editId!);
@@ -174,7 +175,7 @@ export async function mount(app: HTMLElement): Promise<void> {
         navigate('/settings/genres', true);
       } catch {
         btnDelete.disabled = false;
-        showError('削除に失敗しました');
+        showError(t('genres.form.error.delete'));
       }
     });
   }
@@ -205,12 +206,12 @@ export async function mount(app: HTMLElement): Promise<void> {
 
     // Validation
     if (!name) {
-      showError('ジャンル名を入力してください');
+      showError(t('genres.form.error.noName'));
       nameInput.focus();
       return;
     }
     if (selectedColorId === null) {
-      showError('色を選択してください');
+      showError(t('genres.form.error.noColor'));
       return;
     }
 
@@ -221,21 +222,21 @@ export async function mount(app: HTMLElement): Promise<void> {
         const payload: UpdateGenrePayload = { name, colorId: selectedColorId, defaultNotificationTime };
         const result = await genres.update(editId!, payload);
         if (!result.success) {
-          showError(result.error?.message ?? '更新に失敗しました');
+          showError(result.error?.message ?? t('genres.form.error.updateFail'));
           return;
         }
       } else {
         const payload: CreateGenrePayload = { name, colorId: selectedColorId, defaultNotificationTime };
         const result = await genres.create(payload);
         if (!result.success) {
-          showError(result.error?.message ?? '作成に失敗しました');
+          showError(result.error?.message ?? t('genres.form.error.createFail'));
           return;
         }
       }
       carousel?.destroy();
       navigate('/settings/genres', true);
     } catch {
-      showError('通信エラーが発生しました');
+      showError(t('common.error.network'));
     } finally {
       btnSave.disabled = false;
     }

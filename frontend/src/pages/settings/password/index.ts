@@ -1,5 +1,6 @@
 import { navigate } from '../../../utils/router';
 import { userSettings } from '../../../api/settings';
+import { t } from '../../../utils/i18n';
 import './password.css';
 
 export async function mount(app: HTMLElement): Promise<void> {
@@ -7,7 +8,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="password-page">
       <div class="password-header">
         <button class="password-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="password-title">パスワード設定</h1>
+        <h1 class="password-title">${t('password.title')}</h1>
       </div>
       <div class="password-form-wrap">
         <div class="password-field">
@@ -15,7 +16,7 @@ export async function mount(app: HTMLElement): Promise<void> {
             type="password"
             id="input-current"
             class="password-input"
-            placeholder="古いパスワードを入力"
+            placeholder="${t('password.placeholder.current')}"
             autocomplete="current-password"
           />
         </div>
@@ -24,7 +25,7 @@ export async function mount(app: HTMLElement): Promise<void> {
             type="password"
             id="input-new"
             class="password-input"
-            placeholder="新しいパスワードを入力"
+            placeholder="${t('password.placeholder.new')}"
             autocomplete="new-password"
           />
         </div>
@@ -33,12 +34,12 @@ export async function mount(app: HTMLElement): Promise<void> {
             type="password"
             id="input-confirm"
             class="password-input"
-            placeholder="確認用"
+            placeholder="${t('password.placeholder.confirm')}"
             autocomplete="new-password"
           />
         </div>
         <p class="password-error" id="error-msg" aria-live="polite"></p>
-        <button class="password-submit-btn" id="btn-submit">設定する</button>
+        <button class="password-submit-btn" id="btn-submit">${t('password.save')}</button>
       </div>
     </div>
   `;
@@ -61,11 +62,11 @@ export async function mount(app: HTMLElement): Promise<void> {
 
     // クライアント側バリデーション
     if (!currentPassword || !newPassword || !confirmPassword) {
-      errorMsg.textContent = 'すべてのフィールドを入力してください';
+      errorMsg.textContent = t('password.error.empty');
       return;
     }
     if (newPassword !== confirmPassword) {
-      errorMsg.textContent = '新しいパスワードと確認用が一致しません';
+      errorMsg.textContent = t('password.error.confirmMismatch');
       return;
     }
 
@@ -73,20 +74,20 @@ export async function mount(app: HTMLElement): Promise<void> {
     try {
       const result = await userSettings.changePassword({ currentPassword, newPassword, confirmPassword });
       if (result.success) {
-        alert('パスワードを変更しました');
+        alert(t('password.saved'));
         navigate('/settings');
       } else {
         const code = result.error?.code ?? '';
         if (code === 'USER_PASSWORD_MISMATCH') {
-          errorMsg.textContent = '現在のパスワードが正しくありません';
+          errorMsg.textContent = t('password.error.mismatch');
         } else if (code === 'USER_PASSWORD_CONFIRM_MISMATCH') {
-          errorMsg.textContent = '新しいパスワードと確認用が一致しません';
+          errorMsg.textContent = t('password.error.confirmMismatch');
         } else {
-          errorMsg.textContent = result.error?.message ?? 'エラーが発生しました';
+          errorMsg.textContent = result.error?.message ?? t('password.error.generic');
         }
       }
     } catch {
-      errorMsg.textContent = '通信エラーが発生しました';
+      errorMsg.textContent = t('common.error.network');
     } finally {
       btnSubmit.disabled = false;
     }

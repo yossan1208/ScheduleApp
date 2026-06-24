@@ -1,6 +1,7 @@
 import { navigate } from '../../../utils/router';
 import { notifications } from '../../../api/settings';
 import type { NotificationSetting } from '../../../api/settings';
+import { t } from '../../../utils/i18n';
 import './notifications.css';
 
 function escHtml(s: string): string {
@@ -17,7 +18,7 @@ function safeColor(hex: string): string {
 
 function renderRows(settings: NotificationSetting[]): string {
   if (settings.length === 0) {
-    return '<p class="notifications-empty">ジャンルがまだ作成されていません</p>';
+    return `<p class="notifications-empty">${t('notif.empty')}</p>`;
   }
   return settings
     .map(
@@ -44,9 +45,9 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="notifications-page">
       <div class="notifications-header">
         <button class="notifications-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="notifications-title">通知設定</h1>
+        <h1 class="notifications-title">${t('notif.title')}</h1>
       </div>
-      <p class="notifications-loading" id="loading-msg">読み込み中…</p>
+      <p class="notifications-loading" id="loading-msg">${t('common.loading')}</p>
       <ul class="notifications-list" id="notifications-list" style="display:none;"></ul>
     </div>
   `;
@@ -86,9 +87,9 @@ export async function mount(app: HTMLElement): Promise<void> {
     if (result.success && result.data) {
       list.innerHTML = renderRows(result.data);
     } else {
-      list.innerHTML = '<p class="notifications-empty">データの取得に失敗しました</p>';
+      list.innerHTML = `<p class="notifications-empty">${t('notif.error')}</p>`;
     }
   } catch {
-    loadingMsg.textContent = 'データの取得に失敗しました';
+    loadingMsg.textContent = t('notif.error');
   }
 }
