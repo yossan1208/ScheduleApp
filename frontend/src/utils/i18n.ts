@@ -69,6 +69,7 @@ const dict: Record<Lang, Record<string, string>> = {
     'common.error.network': '通信エラーが発生しました',
     'common.error.save':    '保存に失敗しました',
     'common.allDay':        '終日',
+    'common.backToHome':    'ホームに戻る',
 
     // Login
     'login.id':              'ID',
@@ -119,6 +120,11 @@ const dict: Record<Lang, Record<string, string>> = {
     'schedule.history.empty':      '履歴がありません',
     'schedule.history.loading':    '読み込み中…',
     'schedule.history.error':      '取得に失敗しました',
+    'schedule.notif.setTime':      '通知時刻を設定',
+    'schedule.memo.placeholder':   '詳細を入力（任意）',
+    'schedule.history.recent':     '最近の予定',
+    'schedule.error.notFound':     '予定が見つかりません',
+    'schedule.error.delete':       '削除に失敗しました',
 
     // Notes
     'notes.title':    '共有事項',
@@ -271,6 +277,7 @@ const dict: Record<Lang, Record<string, string>> = {
     'common.error.network': 'Network error',
     'common.error.save':    'Failed to save',
     'common.allDay':        'All day',
+    'common.backToHome':    'Back to home',
 
     // Login
     'login.id':              'ID',
@@ -321,6 +328,11 @@ const dict: Record<Lang, Record<string, string>> = {
     'schedule.history.empty':      'No history',
     'schedule.history.loading':    'Loading…',
     'schedule.history.error':      'Failed to load',
+    'schedule.notif.setTime':      'Set notification time',
+    'schedule.memo.placeholder':   'Enter details (optional)',
+    'schedule.history.recent':     'Recent schedules',
+    'schedule.error.notFound':     'Schedule not found',
+    'schedule.error.delete':       'Failed to delete',
 
     // Notes
     'notes.title':    'Shared Notes',

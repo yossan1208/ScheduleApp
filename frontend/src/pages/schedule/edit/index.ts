@@ -23,7 +23,7 @@ function closeSheet(id: string): void {
 }
 
 function showErrorPage(app: HTMLElement, msg: string): void {
-  app.innerHTML = `<div class="detail-error"><span></span><button class="detail-error-btn">ホームに戻る</button></div>`;
+  app.innerHTML = `<div class="detail-error"><span></span><button class="detail-error-btn">${t('common.backToHome')}</button></div>`;
   app.querySelector<HTMLElement>('.detail-error span')!.textContent = msg;
   app.querySelector('.detail-error-btn')!.addEventListener('click', () => navigate('/month'));
 }
@@ -42,7 +42,7 @@ export function mount(app: HTMLElement): void {
   const id    = parseInt(parts[parts.length - 2], 10);
 
   if (!id || isNaN(id)) {
-    showErrorPage(app, '予定が見つかりません');
+    showErrorPage(app, t('schedule.error.notFound'));
     return;
   }
 
@@ -51,7 +51,7 @@ export function mount(app: HTMLElement): void {
   schedules.getScheduleById(id)
     .then(result => {
       if (!result.success || !result.data) {
-        showErrorPage(app, '予定が見つかりません');
+        showErrorPage(app, t('schedule.error.notFound'));
         return;
       }
 
@@ -133,7 +133,7 @@ export function mount(app: HTMLElement): void {
           <!-- 通知時刻シート -->
           <div class="sheet-overlay" id="overlay-notif">
             <div class="bottom-sheet">
-              <div class="sheet-title">通知時刻を設定</div>
+              <div class="sheet-title">${t('schedule.notif.setTime')}</div>
               <input class="sheet-time-input" type="time" id="notif-input" value="${notificationTime}" />
               <button class="sheet-confirm-btn" id="btn-notif-confirm">決定</button>
             </div>
@@ -143,7 +143,7 @@ export function mount(app: HTMLElement): void {
           <div class="sheet-overlay" id="overlay-detail">
             <div class="bottom-sheet">
               <div class="sheet-title">詳細メモ</div>
-              <textarea class="sheet-textarea" id="detail-textarea" placeholder="詳細を入力（任意）"></textarea>
+              <textarea class="sheet-textarea" id="detail-textarea" placeholder="${t('schedule.memo.placeholder')}"></textarea>
               <button class="sheet-confirm-btn" id="btn-detail-confirm">完了</button>
             </div>
           </div>
@@ -309,7 +309,7 @@ export function mount(app: HTMLElement): void {
           .then(delResult => {
             deleteBtn.disabled = false;
             if (!delResult.success) {
-              showError(delResult.error?.message ?? t('genres.form.error.delete'));
+              showError(delResult.error?.message ?? t('schedule.error.delete'));
               return;
             }
             navigate(`/day?date=${s.date.slice(0, 10)}`, true);

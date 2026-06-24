@@ -107,7 +107,7 @@ export function mount(app: HTMLElement): void {
       <!-- 通知時刻シート -->
       <div class="sheet-overlay" id="overlay-notif">
         <div class="bottom-sheet">
-          <div class="sheet-title">通知時刻を設定</div>
+          <div class="sheet-title">${t('schedule.notif.setTime')}</div>
           <input class="sheet-time-input" type="time" id="notif-input" value="09:00" />
           <button class="sheet-confirm-btn" id="btn-notif-confirm">決定</button>
         </div>
@@ -117,7 +117,7 @@ export function mount(app: HTMLElement): void {
       <div class="sheet-overlay" id="overlay-detail">
         <div class="bottom-sheet">
           <div class="sheet-title">詳細メモ</div>
-          <textarea class="sheet-textarea" id="detail-textarea" placeholder="詳細を入力（任意）"></textarea>
+          <textarea class="sheet-textarea" id="detail-textarea" placeholder="${t('schedule.memo.placeholder')}"></textarea>
           <button class="sheet-confirm-btn" id="btn-detail-confirm">完了</button>
         </div>
       </div>
@@ -125,7 +125,7 @@ export function mount(app: HTMLElement): void {
       <!-- 履歴シート -->
       <div class="sheet-overlay" id="overlay-history">
         <div class="bottom-sheet">
-          <div class="sheet-title">最近の予定</div>
+          <div class="sheet-title">${t('schedule.history.recent')}</div>
           <div id="history-list"></div>
         </div>
       </div>
