@@ -2,6 +2,7 @@ import './edit.css';
 import { schedules, type UpdateSchedulePayload } from '../../../api/schedules';
 import { genres } from '../../../api/genres';
 import { navigate } from '../../../utils/router';
+import { t } from '../../../utils/i18n';
 
 let selectedGenreId:    number              = 0;
 let selectedGenreName:  string              = '';
@@ -45,7 +46,7 @@ export function mount(app: HTMLElement): void {
     return;
   }
 
-  app.innerHTML = `<div class="detail-loading">読み込み中…</div>`;
+  app.innerHTML = `<div class="detail-loading">${t('common.loading')}</div>`;
 
   schedules.getScheduleById(id)
     .then(result => {
@@ -69,16 +70,16 @@ export function mount(app: HTMLElement): void {
       const startVal   = s.startTime?.slice(0, 5) ?? '09:00';
       const endVal     = s.endTime?.slice(0, 5) ?? '10:00';
       const genreSel   = s.genre ? ' selected' : '';
-      const visLabel   = visibility === 'group' ? '👥 グループ' : '🔒 個人';
+      const visLabel   = visibility === 'group' ? `👥 ${t('schedule.visibility.public')}` : `🔒 ${t('schedule.visibility.private')}`;
       const detailFilled = detailText ? ' filled' : '';
 
       app.innerHTML = `
         <div class="new-page">
           <div class="new-content">
 
-            <input class="new-title" type="text" id="new-title" placeholder="タイトル" />
+            <input class="new-title" type="text" id="new-title" placeholder="${t('schedule.label.title')}" />
 
-            <button class="new-genre-btn${genreSel}" id="btn-genre" aria-label="ジャンルを選択">
+            <button class="new-genre-btn${genreSel}" id="btn-genre" aria-label="${t('schedule.genre.placeholder')}">
               <span class="new-genre-dot" id="genre-dot"></span>
               <span class="new-genre-label" id="genre-label"></span>
               <span class="new-genre-arrow">▼</span>
@@ -90,11 +91,11 @@ export function mount(app: HTMLElement): void {
 
             <div class="new-time-row" id="time-row"${isAllDay ? ' style="display:none"' : ''}>
               <div class="new-time-block">
-                <label for="start-time">開始</label>
+                <label for="start-time">${t('schedule.label.startTime')}</label>
                 <input type="time" id="start-time" value="${startVal}" />
               </div>
               <div class="new-time-block">
-                <label for="end-time">終了</label>
+                <label for="end-time">${t('schedule.label.endTime')}</label>
                 <input type="time" id="end-time" value="${endVal}" />
               </div>
             </div>
@@ -106,7 +107,7 @@ export function mount(app: HTMLElement): void {
 
             <div class="new-row">
               <button class="new-notif-btn" id="btn-notif">🔔 ${notificationTime}</button>
-              <button class="new-visibility-btn" id="btn-visibility" aria-label="公開範囲">${visLabel}</button>
+              <button class="new-visibility-btn" id="btn-visibility" aria-label="${t('schedule.label.visibility')}">${visLabel}</button>
             </div>
 
             <button class="new-detail-btn${detailFilled}" id="btn-detail"></button>
@@ -124,7 +125,7 @@ export function mount(app: HTMLElement): void {
           <!-- ジャンル選択シート -->
           <div class="sheet-overlay" id="overlay-genre">
             <div class="bottom-sheet">
-              <div class="sheet-title">ジャンルを選択</div>
+              <div class="sheet-title">${t('schedule.genre.placeholder')}</div>
               <div id="genre-list"></div>
             </div>
           </div>
@@ -156,14 +157,14 @@ export function mount(app: HTMLElement): void {
         app.querySelector<HTMLElement>('#genre-dot')!.style.background = s.genre.colorHex;
         app.querySelector<HTMLElement>('#genre-label')!.textContent    = s.genre.name;
       } else {
-        app.querySelector<HTMLElement>('#genre-label')!.textContent = 'ジャンルを選択';
+        app.querySelector<HTMLElement>('#genre-label')!.textContent = t('schedule.genre.placeholder');
       }
 
       const detailBtn = app.querySelector<HTMLElement>('#btn-detail')!;
       if (detailText) {
         detailBtn.textContent = `📝 ${detailText.slice(0, 30)}${detailText.length > 30 ? '…' : ''}`;
       } else {
-        detailBtn.textContent = '📝 詳細メモを追加…';
+        detailBtn.textContent = t('schedule.memo.add');
       }
 
       // ─── エラー表示ユーティリティ ────────────────────────
@@ -183,12 +184,12 @@ export function mount(app: HTMLElement): void {
       app.querySelector('#btn-genre')!.addEventListener('click', () => {
         openSheet('overlay-genre');
         const list = app.querySelector<HTMLElement>('#genre-list')!;
-        list.innerHTML = '<div style="color:#888;padding:0.5rem 0">読み込み中…</div>';
+        list.innerHTML = `<div style="color:#888;padding:0.5rem 0">${t('schedule.history.loading')}</div>`;
         genres.getGenres()
           .then(res => {
             list.innerHTML = '';
             if (!res.success || !res.data?.length) {
-              list.innerHTML = '<div style="color:#888;padding:0.5rem 0">ジャンルがまだ作成されていません</div>';
+              list.innerHTML = `<div style="color:#888;padding:0.5rem 0">${t('schedule.error.noGenreList')}</div>`;
               return;
             }
             res.data.forEach(g => {
@@ -214,7 +215,7 @@ export function mount(app: HTMLElement): void {
             });
           })
           .catch(() => {
-            list.innerHTML = '<div style="color:#888;padding:0.5rem 0">取得に失敗しました</div>';
+            list.innerHTML = `<div style="color:#888;padding:0.5rem 0">${t('schedule.history.error')}</div>`;
           });
       });
 
@@ -267,7 +268,7 @@ export function mount(app: HTMLElement): void {
       app.querySelector('#btn-visibility')!.addEventListener('click', () => {
         visibility = visibility === 'group' ? 'private' : 'group';
         (app.querySelector('#btn-visibility') as HTMLElement).textContent =
-          visibility === 'group' ? '👥 グループ' : '🔒 個人';
+          visibility === 'group' ? `👥 ${t('schedule.visibility.public')}` : `🔒 ${t('schedule.visibility.private')}`;
       });
 
       // ─── 詳細メモシート ──────────────────────────────────
@@ -286,7 +287,7 @@ export function mount(app: HTMLElement): void {
           btn.textContent = `📝 ${detailText.slice(0, 30)}${detailText.length > 30 ? '…' : ''}`;
           btn.classList.add('filled');
         } else {
-          btn.textContent = '📝 詳細メモを追加…';
+          btn.textContent = t('schedule.memo.add');
           btn.classList.remove('filled');
         }
         closeSheet('overlay-detail');
@@ -298,7 +299,7 @@ export function mount(app: HTMLElement): void {
 
       // ─── 削除 ────────────────────────────────────────────
       app.querySelector('#btn-delete')!.addEventListener('click', () => {
-        if (!window.confirm('この予定を削除しますか？')) return;
+        if (!window.confirm(t('day.deleteConfirm'))) return;
 
         const deleteBtn = app.querySelector<HTMLButtonElement>('#btn-delete')!;
         deleteBtn.disabled = true;
@@ -308,14 +309,14 @@ export function mount(app: HTMLElement): void {
           .then(delResult => {
             deleteBtn.disabled = false;
             if (!delResult.success) {
-              showError(delResult.error?.message ?? '削除に失敗しました');
+              showError(delResult.error?.message ?? t('genres.form.error.delete'));
               return;
             }
             navigate(`/day?date=${s.date.slice(0, 10)}`, true);
           })
           .catch(() => {
             deleteBtn.disabled = false;
-            showError('通信エラーが発生しました');
+            showError(t('common.error.network'));
           });
       });
 
@@ -332,8 +333,8 @@ export function mount(app: HTMLElement): void {
         const endTime   = isAllDay ? null
           : (app.querySelector<HTMLInputElement>('#end-time')!.value || null);
 
-        if (!title)           { showError('タイトルを入力してください'); return; }
-        if (!selectedGenreId) { showError('ジャンルを選択してください'); return; }
+        if (!title)           { showError(t('schedule.error.noTitle')); return; }
+        if (!selectedGenreId) { showError(t('schedule.error.noGenre')); return; }
 
         const payload: UpdateSchedulePayload = {
           date:            eventDate,
@@ -352,18 +353,18 @@ export function mount(app: HTMLElement): void {
           .then(upResult => {
             saveBtn.disabled = false;
             if (!upResult.success || !upResult.data) {
-              showError(upResult.error?.message ?? '更新に失敗しました');
+              showError(upResult.error?.message ?? t('common.error.save'));
               return;
             }
             navigate(`/schedule/${id}`, true);
           })
           .catch(() => {
             saveBtn.disabled = false;
-            showError('通信エラーが発生しました');
+            showError(t('common.error.network'));
           });
       });
     })
     .catch(() => {
-      showErrorPage(app, '取得に失敗しました');
+      showErrorPage(app, t('schedule.history.error'));
     });
 }
