@@ -1,11 +1,11 @@
 import './day.css';
 import { schedules, type Schedule } from '../../api/schedules';
 import { navigate, registerPopstateHook, unregisterPopstateHook } from '../../utils/router';
+import { t, getLang, daysLong, fmtMonthLabel, fmtFullDate, fmtCountBadge } from '../../utils/i18n';
 
 // ─── 定数 ─────────────────────────────────────────────
 const VIEW_MODE_KEY = 'scr20_view_mode';
 const HOUR_HEIGHT   = 60;
-const DAY_NAMES_JA  = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
 const DELETE_PX     = 64;
 const SHEET_CLOSE_THRESHOLD = 80; // px
 
@@ -41,8 +41,10 @@ function timeToMinutes(t: string): number {
 function headerText(dateStr: string): { name: string; date: string } {
   const d = new Date(`${dateStr}T00:00:00`);
   return {
-    name: DAY_NAMES_JA[d.getDay()],
-    date: `${d.getMonth() + 1}月 ${d.getDate()}日`,
+    name: daysLong()[d.getDay()],
+    date: getLang() === 'ja'
+      ? `${d.getMonth() + 1}月 ${d.getDate()}日`
+      : `${fmtMonthLabel(d.getMonth() + 1)} ${d.getDate()}`,
   };
 }
 
@@ -51,14 +53,6 @@ function isDarkColor(hex: string): boolean {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
-}
-
-function formatDate(dateStr: string): string {
-  const days   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`;
 }
 
 // ─── カードスワイプ: 開いているカードを閉じる ─────────
@@ -218,7 +212,7 @@ function attachSheetDrag(
 function renderList(area: HTMLElement, list: Schedule[], currentUserId: number, onDelete: (id: number) => void): void {
   area.innerHTML = '';
   if (list.length === 0) {
-    area.innerHTML = '<div class="day-empty">予定なし</div>';
+    area.innerHTML = `<div class="day-empty">${t('day.empty')}</div>`;
     return;
   }
 
@@ -231,7 +225,7 @@ function renderList(area: HTMLElement, list: Schedule[], currentUserId: number, 
     if (isCreator) {
       deleteBtn = document.createElement('button');
       deleteBtn.className = 'day-delete-btn';
-      deleteBtn.textContent = '削除';
+      deleteBtn.textContent = t('day.deleteBtn');
       wrap.appendChild(deleteBtn);
     }
 
@@ -363,7 +357,7 @@ function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: numb
   area.innerHTML = '';
 
   if (list.length === 0) {
-    area.innerHTML = '<div class="day-empty">予定なし</div>';
+    area.innerHTML = `<div class="day-empty">${t('day.empty')}</div>`;
     return;
   }
 
@@ -409,7 +403,7 @@ function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: numb
     if (isCreator) {
       deleteBtn = document.createElement('button');
       deleteBtn.className = 'day-delete-btn';
-      deleteBtn.textContent = '削除';
+      deleteBtn.textContent = t('day.deleteBtn');
       wrap.appendChild(deleteBtn);
     }
 
@@ -440,7 +434,7 @@ function renderTimeline(area: HTMLElement, list: Schedule[], currentUserId: numb
     if (overflowBadge > 0) {
       const badge = document.createElement('div');
       badge.className   = 'day-event-overflow-badge';
-      badge.textContent = `+${overflowBadge}件`;
+      badge.textContent = fmtCountBadge(overflowBadge);
       block.appendChild(badge);
     }
 
@@ -608,7 +602,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
     sheetBody.innerHTML = '';
     const loadEl = document.createElement('div');
     loadEl.className = 'day-sheet-loading';
-    loadEl.textContent = '読み込み中…';
+    loadEl.textContent = t('common.loading');
     sheetBody.appendChild(loadEl);
     showSheetUI();
 
@@ -630,9 +624,9 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
 
         const timeStr = s.startTime
           ? `${s.startTime.slice(0, 5)}${s.endTime ? ` - ${s.endTime.slice(0, 5)}` : ''}`
-          : '終日';
+          : t('common.allDay');
         const storedId = parseInt(localStorage.getItem('currentUserId') ?? '0', 10);
-        const creatorLabel = s.creatorId === storedId ? '自分' : '他のメンバー';
+        const creatorLabel = s.creatorId === storedId ? t('day.self') : t('day.other');
 
         sheetBody.innerHTML = '';
 
@@ -643,7 +637,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
 
         const datePara = document.createElement('p');
         datePara.className = 'day-sheet-date';
-        datePara.textContent = formatDate(s.date);
+        datePara.textContent = fmtFullDate(new Date(`${s.date}T00:00:00`));
         sheetBody.appendChild(datePara);
 
         if (s.genre) {
@@ -700,7 +694,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
         sheetBody.innerHTML = '';
         const errEl = document.createElement('div');
         errEl.className = 'day-sheet-loading';
-        errEl.textContent = '取得に失敗しました';
+        errEl.textContent = t('day.sheetError');
         sheetBody.appendChild(errEl);
       });
   }
@@ -740,7 +734,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
 
   function handleDelete(id: number): void {
     if (deletingIds.has(id)) return;
-    if (!window.confirm('この予定を削除しますか？')) { closeOpenCard(); return; }
+    if (!window.confirm(t('day.deleteConfirm'))) { closeOpenCard(); return; }
     deletingIds.add(id);
 
     schedules.deleteSchedule(id)
@@ -760,7 +754,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
   schedules.getSchedules(dateStr, dateStr)
     .then(result => {
       if (!result.success || !result.data) {
-        area.innerHTML = '<div class="day-empty">予定を取得できませんでした</div>';
+        area.innerHTML = `<div class="day-empty">${t('day.fetchError')}</div>`;
         return;
       }
       currentSchedules = result.data.sort((a, b) => {

@@ -1,9 +1,9 @@
 import './week.css';
 import { schedules, type Schedule } from '../../api/schedules';
 import { navigate } from '../../utils/router';
+import { daysShort, fmtMonthLabel, fmtCountBadge, t } from '../../utils/i18n';
 
 const DAYS_SHOWN   = 7;
-const DAY_NAMES_JA = ['日', '月', '火', '水', '木', '金', '土'];
 
 // ─── ユーティリティ ────────────────────────────────────
 
@@ -28,7 +28,7 @@ function dateRangeArray(start: string, count: number): string[] {
 
 function getMonthLabel(dateStr: string): string {
   const d = new Date(`${dateStr}T00:00:00`);
-  return `${d.getMonth() + 1}月`;
+  return fmtMonthLabel(d.getMonth() + 1);
 }
 
 function isTodayInWindow(startDate: string, today: string): boolean {
@@ -50,7 +50,7 @@ function renderRows(
 
   allDates.forEach(dateStr => {
     const d = new Date(`${dateStr}T00:00:00`);
-    const dayName = DAY_NAMES_JA[d.getDay()];
+    const dayName = daysShort()[d.getDay()];
     const dayNum  = String(d.getDate());
     const isToday = dateStr === today;
     const list    = scheduleMap.get(dateStr) ?? [];
@@ -101,7 +101,7 @@ function renderRows(
         time.className   = 'week-schedule-card-time';
         time.textContent = s.startTime
           ? `${s.startTime.slice(0, 5)} ~ ${s.endTime?.slice(0, 5) ?? ''}`
-          : '終日';
+          : t('common.allDay');
 
         body.appendChild(title);
         body.appendChild(time);
@@ -115,7 +115,7 @@ function renderRows(
       if (list.length > 2) {
         const badge = document.createElement('div');
         badge.className   = 'week-count-badge';
-        badge.textContent = `+${list.length - 2}件`;
+        badge.textContent = fmtCountBadge(list.length - 2);
         schCol.appendChild(badge);
       }
     }

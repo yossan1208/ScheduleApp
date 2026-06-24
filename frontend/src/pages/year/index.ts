@@ -1,9 +1,6 @@
 import './year.css';
 import { navigate } from '../../utils/router';
-
-// ─── 定数 ─────────────────────────────────────────────
-const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-const DOW_LABELS  = ['S','M','T','W','T','F','S'];
+import { months, daysShort } from '../../utils/i18n';
 
 // ─── ユーティリティ ────────────────────────────────────
 function pad2(n: number): string {
@@ -31,13 +28,13 @@ function buildMonthCard(year: number, month: number, today: string): HTMLElement
   // 月名
   const name = document.createElement('div');
   name.className   = 'year-month-name';
-  name.textContent = MONTH_NAMES[month];
+  name.textContent = months()[month];
   card.appendChild(name);
 
   // 曜日ヘッダー
   const dowRow = document.createElement('div');
   dowRow.className = 'year-dow-row';
-  DOW_LABELS.forEach((label, i) => {
+  daysShort().forEach((label, i) => {
     const cell = document.createElement('span');
     cell.className   = `year-dow-cell${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}`;
     cell.textContent = label;

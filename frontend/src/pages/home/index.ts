@@ -2,6 +2,7 @@ import './home.css';
 import { schedules, type Schedule } from '../../api/schedules';
 import { buildCalendarGrid } from './calendar';
 import { navigate } from '../../utils/router';
+import { t, fmtYearMonth } from '../../utils/i18n';
 
 let currentYear      = 0;
 let currentMonth     = 0;
@@ -19,15 +20,11 @@ function todayStr(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function monthLabel(year: number, month: number): string {
-  return `${year}年${month + 1}月`;
-}
-
 async function refreshCalendar(
   wrapper: HTMLElement,
   label: HTMLElement,
 ): Promise<void> {
-  wrapper.innerHTML = '<div class="calendar-loading">読み込み中…</div>';
+  wrapper.innerHTML = `<div class="calendar-loading">${t('common.loading')}</div>`;
 
   const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
   const from    = `${currentYear}-${pad(currentMonth + 1)}-01`;
@@ -36,12 +33,12 @@ async function refreshCalendar(
   const result = await schedules.getSchedules(from, to);
 
   if (!result.success || !result.data) {
-    wrapper.innerHTML = '<div class="calendar-error">予定を取得できませんでした</div>';
+    wrapper.innerHTML = `<div class="calendar-error">${t('home.error')}</div>`;
     return;
   }
 
   currentSchedules  = result.data;
-  label.textContent = monthLabel(currentYear, currentMonth);
+  label.textContent = fmtYearMonth(currentYear, currentMonth + 1);
 
   const grid = buildCalendarGrid(currentYear, currentMonth, currentSchedules);
   wrapper.innerHTML = '';
@@ -154,7 +151,7 @@ export function mount(app: HTMLElement): void {
   app.innerHTML = `
     <div class="home-page">
       <div class="home-header">
-        <h2 class="month-label" id="month-label">${monthLabel(currentYear, currentMonth)}</h2>
+        <h2 class="month-label" id="month-label">${fmtYearMonth(currentYear, currentMonth + 1)}</h2>
         <button class="icon-btn" id="btn-settings" aria-label="設定">⚙</button>
       </div>
       <div class="calendar-wrapper" id="calendar-wrapper"></div>
