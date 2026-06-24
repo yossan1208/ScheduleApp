@@ -1,5 +1,6 @@
 import '../settings.css';
 import { navigate } from '../../../utils/router';
+import { t } from '../../../utils/i18n';
 
 export async function mount(app: HTMLElement): Promise<void> {
   if (localStorage.getItem('role') !== '0') {
@@ -11,15 +12,15 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="settings-page">
       <div class="settings-header">
         <button class="settings-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="settings-title">管理者設定</h1>
+        <h1 class="settings-title">${t('admin.title')}</h1>
       </div>
       <ul class="settings-menu">
         <li class="settings-menu-item" id="item-users">
-          <span class="settings-menu-label">ユーザー管理</span>
+          <span class="settings-menu-label">${t('admin.menu.users')}</span>
           <span class="settings-menu-arrow">›</span>
         </li>
         <li class="settings-menu-item" id="item-groups">
-          <span class="settings-menu-label">グループ作成</span>
+          <span class="settings-menu-label">${t('admin.menu.groups')}</span>
           <span class="settings-menu-arrow">›</span>
         </li>
       </ul>

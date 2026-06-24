@@ -1,6 +1,7 @@
 import './form.css';
 import { admin } from '../../../../../api/admin';
 import { navigate } from '../../../../../utils/router';
+import { t } from '../../../../../utils/i18n';
 
 export async function mount(app: HTMLElement): Promise<void> {
   if (localStorage.getItem('role') !== '0') {
@@ -12,7 +13,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="admin-form-page">
       <div class="admin-form-header">
         <button class="admin-form-back-btn" id="btn-back" aria-label="戻る">←</button>
-        <h1 class="admin-form-title">アカウント作成</h1>
+        <h1 class="admin-form-title">${t('admin.user.form.title')}</h1>
       </div>
       <div class="admin-form-body">
         <div class="admin-form-field">
@@ -20,30 +21,30 @@ export async function mount(app: HTMLElement): Promise<void> {
           <input class="admin-form-input" type="text" id="f-loginid" placeholder="例: tanaka01" autocomplete="off" />
         </div>
         <div class="admin-form-field">
-          <label for="f-name">名前</label>
+          <label for="f-name">${t('admin.user.form.name')}</label>
           <input class="admin-form-input" type="text" id="f-name" placeholder="田中 太郎" />
         </div>
         <div class="admin-form-field">
-          <label for="f-password">初期パスワード</label>
-          <input class="admin-form-input" type="password" id="f-password" placeholder="初期パスワード" autocomplete="new-password" />
+          <label for="f-password">${t('admin.user.form.password')}</label>
+          <input class="admin-form-input" type="password" id="f-password" placeholder="${t('admin.user.form.password')}" autocomplete="new-password" />
         </div>
         <div class="admin-form-field">
-          <label>ロール</label>
+          <label>${t('admin.user.form.role')}</label>
           <div class="admin-role-options">
             <label class="admin-role-option">
-              <input type="radio" name="role" value="0" /> 管理者
+              <input type="radio" name="role" value="0" /> ${t('admin.users.role.admin')}
             </label>
             <label class="admin-role-option">
-              <input type="radio" name="role" value="1" /> GL
+              <input type="radio" name="role" value="1" /> ${t('admin.users.role.gl')}
             </label>
             <label class="admin-role-option">
-              <input type="radio" name="role" value="2" checked /> 一般
+              <input type="radio" name="role" value="2" checked /> ${t('admin.users.role.general')}
             </label>
           </div>
         </div>
       </div>
       <p class="admin-form-error" id="form-error"></p>
-      <button class="admin-form-submit-btn" id="btn-submit">作成する</button>
+      <button class="admin-form-submit-btn" id="btn-submit">${t('admin.user.form.submit')}</button>
     </div>
   `;
 
@@ -62,7 +63,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     const roleVal  = (app.querySelector<HTMLInputElement>('input[name="role"]:checked')?.value) ?? '2';
 
     if (!loginId || !name || !password) {
-      errorEl.textContent = 'すべての項目を入力してください';
+      errorEl.textContent = t('admin.user.form.error.required');
       return;
     }
 
@@ -74,8 +75,8 @@ export async function mount(app: HTMLElement): Promise<void> {
     if (!result.success) {
       const code = result.error?.code;
       errorEl.textContent = code === 'ADMIN_LOGIN_ID_CONFLICT'
-        ? 'このLoginIdはすでに使われています'
-        : '作成に失敗しました';
+        ? t('admin.user.form.error.loginIdConflict')
+        : t('admin.user.form.error.generic');
       submitBtn.disabled = false;
       return;
     }
