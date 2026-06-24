@@ -5,6 +5,7 @@ import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { memos, type MemoBlock } from '../../../../api/notes';
 import { navigate } from '../../../../utils/router';
+import { t } from '../../../../utils/i18n';
 
 function parsePath(): { noteId: number; memoId: number } {
   const m = location.pathname.match(/^\/notes\/(\d+)\/memos\/(\d+)$/);
@@ -181,7 +182,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   const result = await memos.getDetail(memoId);
   if (!result.success || !result.data) {
     app.querySelector<HTMLElement>('.edit-editor-wrap')!.innerHTML =
-      '<p style="color:#ef4444;padding:16px">メモを取得できませんでした</p>';
+      `<p style="color:#ef4444;padding:16px">${t('memo.edit.error')}</p>`;
     return;
   }
 
@@ -242,26 +243,26 @@ export async function mount(app: HTMLElement): Promise<void> {
 
   // ── 削除ボタン ───────────────────────────────────────────
   deleteBtn.addEventListener('click', async () => {
-    if (!confirm('このメモを削除しますか？')) return;
+    if (!confirm(t('memo.edit.deleteConfirm'))) return;
     const r = await memos.delete(memoId);
     if (r.success) { editor?.destroy(); navigate(`/notes/${noteId}`, true); }
-    else alert('削除に失敗しました');
+    else alert(t('memo.edit.deleteError'));
   });
 
   // ── 自動保存 ─────────────────────────────────────────────
   function scheduleSave(): void {
     if (saveTimer !== null) clearTimeout(saveTimer);
-    saveStatus.textContent = '編集中…';
+    saveStatus.textContent = t('memo.edit.editing');
     saveTimer = setTimeout(() => flush().catch(() => {}), 1500);
   }
 
   async function flush(): Promise<void> {
     saveTimer = null;
     if (!editor) return;
-    saveStatus.textContent = '保存中…';
+    saveStatus.textContent = t('memo.edit.saving');
     const payload = { blocks: tiptapToBlocks(editor.getJSON() as Record<string, unknown>) };
     const r = await memos.save(memoId, payload);
-    saveStatus.textContent = r.success ? '保存しました' : '保存に失敗';
+    saveStatus.textContent = r.success ? t('memo.edit.saved') : t('memo.edit.saveFail');
     setTimeout(() => { saveStatus.textContent = ''; }, 2000);
   }
 }

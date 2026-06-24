@@ -1,6 +1,7 @@
 import './notes.css';
 import { notes, memos, type MemoBlock } from '../../api/notes';
 import { navigate } from '../../utils/router';
+import { t } from '../../utils/i18n';
 
 function escHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -57,16 +58,16 @@ export async function mount(app: HTMLElement): Promise<void> {
   app.innerHTML = `
     <div class="notes-page">
       <div class="notes-header">
-        <h1 class="notes-title">SHARE</h1>
+        <h1 class="notes-title">${t('notes.title')}</h1>
       </div>
-      <div id="notes-body"><p class="notes-empty">読み込み中…</p></div>
-      <button class="notes-archive-btn" id="btn-archive">Archive</button>
-      <button class="notes-nav-btn" id="btn-schedule" aria-label="スケジュールへ">
+      <div id="notes-body"><p class="notes-empty">${t('common.loading')}</p></div>
+      <button class="notes-archive-btn" id="btn-archive">${t('notes.archive')}</button>
+      <button class="notes-nav-btn" id="btn-schedule" aria-label="${t('notes.aria.schedule')}">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
           <path d="M8 2v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3V2h-2v2h-4V2H8zM5 10h14v10H5V10zm2 2v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
         </svg>
       </button>
-      <button class="notes-fab" id="btn-fab" aria-label="ノートを追加">+</button>
+      <button class="notes-fab" id="btn-fab" aria-label="${t('notes.aria.add')}">+</button>
     </div>
   `;
 
@@ -78,7 +79,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   const body = app.querySelector<HTMLElement>('#notes-body')!;
 
   if (!result.success || !result.data) {
-    body.innerHTML = '<p class="notes-empty">ノートを取得できませんでした</p>';
+    body.innerHTML = `<p class="notes-empty">${t('notes.error')}</p>`;
     return;
   }
 
@@ -111,20 +112,20 @@ export async function mount(app: HTMLElement): Promise<void> {
 
     html += `
       <div class="notes-system-card" data-system-id="${systemNote.id}">
-        <div class="notes-system-title">重要事項</div>
+        <div class="notes-system-title">${t('notes.system.title')}</div>
         ${contentHtml}
       </div>`;
   }
 
   if (normalNotes.length > 0) {
-    html += `<p class="notes-section-label">ノート</p><div class="notes-list">`;
+    html += `<p class="notes-section-label">${t('notes.section.label')}</p><div class="notes-list">`;
     for (const note of normalNotes) {
       const safeColor = /^#[0-9a-fA-F]{3,6}$/.test(note.color ?? '') ? note.color : '#ccc';
       html += `<div class="notes-card" data-id="${note.id}" style="border-left-color: ${safeColor}">${escHtml(note.name)}</div>`;
     }
     html += `</div>`;
   } else if (!systemNote) {
-    html = '<p class="notes-empty">ノートがありません</p>';
+    html = `<p class="notes-empty">${t('notes.empty')}</p>`;
   }
 
   body.innerHTML = html;

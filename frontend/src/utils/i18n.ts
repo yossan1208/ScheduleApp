@@ -128,16 +128,21 @@ const dict: Record<Lang, Record<string, string>> = {
     'schedule.error.delete':       '削除に失敗しました',
 
     // Notes
-    'notes.title':    '共有事項',
-    'notes.new':      '+ 新規',
-    'notes.archive':  'アーカイブ',
-    'notes.empty':    'ノートがありません',
-    'notes.error':    'ノートを取得できませんでした',
+    'notes.title':              '共有事項',
+    'notes.new':                '+ 新規',
+    'notes.archive':            'アーカイブ',
+    'notes.empty':              'ノートがありません',
+    'notes.error':              'ノートを取得できませんでした',
+    'notes.system.title':       '重要事項',
+    'notes.section.label':      'ノート',
+    'notes.aria.add':           'ノートを追加',
+    'notes.aria.schedule':      'スケジュールへ',
 
     // Notes form
     'notes.form.createTitle':   'ノートを作成',
     'notes.form.editTitle':     'ノートを編集',
     'notes.form.label':         'ノート名',
+    'notes.form.label.color':   '色',
     'notes.form.placeholder':   'ノート名を入力',
     'notes.form.submit.create': '作成する',
     'notes.form.submit.edit':   '更新する',
@@ -152,12 +157,17 @@ const dict: Record<Lang, Record<string, string>> = {
     'notes.archive.deleteError':   '削除に失敗しました',
 
     // Memos
-    'memos.archiveConfirm': 'このノートをアーカイブに移動しますか？',
-    'memos.archiveError':   'アーカイブに失敗しました',
-    'memos.createError':    'メモの作成に失敗しました',
-    'memos.empty':          'メモがありません',
-    'memos.error':          'メモを取得できませんでした',
-    'memos.noTitle':        '（タイトルなし）',
+    'memos.archiveConfirm':       'このノートをアーカイブに移動しますか？',
+    'memos.archiveError':         'アーカイブに失敗しました',
+    'memos.archiveBtnLabel':      'アーカイブに移動',
+    'memos.createError':          'メモの作成に失敗しました',
+    'memos.empty':                'メモがありません',
+    'memos.error':                'メモを取得できませんでした',
+    'memos.noTitle':              '（タイトルなし）',
+    'memos.section.important':    '重要事項',
+    'memos.section.normal':       'メモ',
+    'memos.aria.add':             'メモを追加',
+    'memos.aria.schedule':        'スケジュールへ',
 
     // Memo edit
     'memo.edit.error':         'メモを取得できませんでした',
@@ -337,16 +347,21 @@ const dict: Record<Lang, Record<string, string>> = {
     'schedule.error.delete':       'Failed to delete',
 
     // Notes
-    'notes.title':    'Shared Notes',
-    'notes.new':      '+ New',
-    'notes.archive':  'Archive',
-    'notes.empty':    'No notes',
-    'notes.error':    'Failed to load notes',
+    'notes.title':              'Shared Notes',
+    'notes.new':                '+ New',
+    'notes.archive':            'Archive',
+    'notes.empty':              'No notes',
+    'notes.error':              'Failed to load notes',
+    'notes.system.title':       'Important',
+    'notes.section.label':      'Notes',
+    'notes.aria.add':           'Add note',
+    'notes.aria.schedule':      'Go to schedule',
 
     // Notes form
     'notes.form.createTitle':   'Create Note',
     'notes.form.editTitle':     'Edit Note',
     'notes.form.label':         'Note name',
+    'notes.form.label.color':   'Color',
     'notes.form.placeholder':   'Enter note name',
     'notes.form.submit.create': 'Create',
     'notes.form.submit.edit':   'Update',
@@ -361,12 +376,17 @@ const dict: Record<Lang, Record<string, string>> = {
     'notes.archive.deleteError':   'Failed to delete',
 
     // Memos
-    'memos.archiveConfirm': 'Move this note to archive?',
-    'memos.archiveError':   'Failed to archive',
-    'memos.createError':    'Failed to create memo',
-    'memos.empty':          'No memos',
-    'memos.error':          'Failed to load memos',
-    'memos.noTitle':        '(No title)',
+    'memos.archiveConfirm':       'Move this note to archive?',
+    'memos.archiveError':         'Failed to archive',
+    'memos.archiveBtnLabel':      'Move to archive',
+    'memos.createError':          'Failed to create memo',
+    'memos.empty':                'No memos',
+    'memos.error':                'Failed to load memos',
+    'memos.noTitle':              '(No title)',
+    'memos.section.important':    'Important',
+    'memos.section.normal':       'Memos',
+    'memos.aria.add':             'Add memo',
+    'memos.aria.schedule':        'Go to schedule',
 
     // Memo edit
     'memo.edit.error':         'Failed to load memo',

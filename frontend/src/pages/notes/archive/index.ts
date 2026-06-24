@@ -1,6 +1,7 @@
 import './archive.css';
 import { notes } from '../../../api/notes';
 import { navigate } from '../../../utils/router';
+import { t } from '../../../utils/i18n';
 
 function escapeHtml(str: string): string {
   return str
@@ -17,9 +18,9 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="archive-page">
       <div class="archive-header">
         <button class="archive-back-btn" id="btn-back">←</button>
-        <h1 class="archive-header-title">Archive</h1>
+        <h1 class="archive-header-title">${t('notes.archive.title')}</h1>
       </div>
-      <div id="archive-body"><p class="archive-empty">読み込み中…</p></div>
+      <div id="archive-body"><p class="archive-empty">${t('common.loading')}</p></div>
     </div>
   `;
 
@@ -33,13 +34,13 @@ async function loadArchive(app: HTMLElement, isAdmin: boolean): Promise<void> {
 
   const result = await notes.getAll(true);
   if (!result.success || !result.data) {
-    body.innerHTML = '<p class="archive-empty">取得できませんでした</p>';
+    body.innerHTML = `<p class="archive-empty">${t('notes.archive.error')}</p>`;
     return;
   }
 
   const archivedNotes = result.data;
   if (archivedNotes.length === 0) {
-    body.innerHTML = '<p class="archive-empty">アーカイブされたノートはありません</p>';
+    body.innerHTML = `<p class="archive-empty">${t('notes.archive.empty')}</p>`;
     return;
   }
 
@@ -62,11 +63,11 @@ async function loadArchive(app: HTMLElement, isAdmin: boolean): Promise<void> {
   if (isAdmin) {
     list.querySelectorAll<HTMLElement>('[data-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('このノートを完全に削除しますか？この操作は取り消せません。')) return;
+        if (!confirm(t('notes.archive.deleteConfirm'))) return;
         const id = parseInt(btn.dataset.id!, 10);
         const r = await notes.delete(id);
         if (r.success) await loadArchive(app, isAdmin);
-        else alert('削除に失敗しました');
+        else alert(t('notes.archive.deleteError'));
       });
     });
   }

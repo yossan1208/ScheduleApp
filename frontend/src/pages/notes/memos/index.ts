@@ -1,6 +1,7 @@
 import './memos.css';
 import { notes, memos } from '../../../api/notes';
 import { navigate } from '../../../utils/router';
+import { t } from '../../../utils/i18n';
 
 function parseNoteId(): number {
   const match = location.pathname.match(/^\/notes\/(\d+)/);
@@ -29,16 +30,16 @@ export async function mount(app: HTMLElement): Promise<void> {
     <div class="memos-page">
       <div class="memos-header">
         <button class="memos-back-btn" id="btn-back">←</button>
-        <h1 class="memos-header-title" id="note-title">読み込み中…</h1>
+        <h1 class="memos-header-title" id="note-title">${t('common.loading')}</h1>
       </div>
       <div id="memos-body"></div>
-      <button class="memos-archive-btn" id="btn-archive" style="display:none">アーカイブに移動</button>
-      <button class="memos-nav-btn" id="btn-schedule" aria-label="スケジュールへ">
+      <button class="memos-archive-btn" id="btn-archive" style="display:none">${t('memos.archiveBtnLabel')}</button>
+      <button class="memos-nav-btn" id="btn-schedule" aria-label="${t('memos.aria.schedule')}">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
           <path d="M8 2v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3V2h-2v2h-4V2H8zM5 10h14v10H5V10zm2 2v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
         </svg>
       </button>
-      <button class="memos-fab" id="btn-fab" aria-label="メモを追加">+</button>
+      <button class="memos-fab" id="btn-fab" aria-label="${t('memos.aria.add')}">+</button>
     </div>
   `;
 
@@ -60,10 +61,10 @@ export async function mount(app: HTMLElement): Promise<void> {
   if (!isSystem) {
     archiveBtn.style.display = '';
     archiveBtn.addEventListener('click', async () => {
-      if (!confirm('このノートをアーカイブに移動しますか？')) return;
+      if (!confirm(t('memos.archiveConfirm'))) return;
       const r = await notes.archive(noteId);
       if (r.success) navigate('/notes');
-      else alert('アーカイブに失敗しました');
+      else alert(t('memos.archiveError'));
     });
   }
 
@@ -73,7 +74,7 @@ export async function mount(app: HTMLElement): Promise<void> {
     fabBtn.disabled = true;
     const r = await memos.create(noteId);
     fabBtn.disabled = false;
-    if (!r.success || !r.data) { alert('メモの作成に失敗しました'); return; }
+    if (!r.success || !r.data) { alert(t('memos.createError')); return; }
     navigate(`/notes/${noteId}/memos/${r.data.id}`);
   });
 
@@ -82,17 +83,17 @@ export async function mount(app: HTMLElement): Promise<void> {
 
 async function loadMemos(app: HTMLElement, noteId: number): Promise<void> {
   const body = app.querySelector<HTMLElement>('#memos-body')!;
-  body.innerHTML = '<p class="memos-empty">読み込み中…</p>';
+  body.innerHTML = `<p class="memos-empty">${t('common.loading')}</p>`;
 
   const result = await memos.getByNote(noteId);
   if (!result.success || !result.data) {
-    body.innerHTML = '<p class="memos-empty">メモを取得できませんでした</p>';
+    body.innerHTML = `<p class="memos-empty">${t('memos.error')}</p>`;
     return;
   }
 
   const all = result.data;
   if (all.length === 0) {
-    body.innerHTML = '<p class="memos-empty">メモがありません</p>';
+    body.innerHTML = `<p class="memos-empty">${t('memos.empty')}</p>`;
     return;
   }
 
@@ -102,17 +103,17 @@ async function loadMemos(app: HTMLElement, noteId: number): Promise<void> {
   let html = '';
 
   if (important.length > 0) {
-    html += `<p class="memos-section-label">重要事項</p><div class="memos-list">`;
+    html += `<p class="memos-section-label">${t('memos.section.important')}</p><div class="memos-list">`;
     for (const m of important) {
-      html += memoCardHtml(m.id, m.title ?? '（タイトルなし）', m.updatedAt);
+      html += memoCardHtml(m.id, m.title ?? t('memos.noTitle'), m.updatedAt);
     }
     html += `</div>`;
   }
 
   if (normal.length > 0) {
-    html += `<p class="memos-section-label">メモ</p><div class="memos-list">`;
+    html += `<p class="memos-section-label">${t('memos.section.normal')}</p><div class="memos-list">`;
     for (const m of normal) {
-      html += memoCardHtml(m.id, m.title ?? '（タイトルなし）', m.updatedAt);
+      html += memoCardHtml(m.id, m.title ?? t('memos.noTitle'), m.updatedAt);
     }
     html += `</div>`;
   }
