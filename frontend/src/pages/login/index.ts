@@ -1,6 +1,7 @@
 import './login.css';
 import { auth } from '../../api/auth';
 import { navigate } from '../../utils/router';
+import { applyThemeColor } from '../../utils/theme';
 
 const ERROR_MESSAGES: Record<string, string> = {
   AUTH_INVALID_CREDENTIALS: 'IDまたはパスワードが違います',
@@ -49,7 +50,8 @@ export function mount(app: HTMLElement): void {
       return;
     }
 
-    document.documentElement.style.setProperty('--theme-color', result.data.themeColorHex);
+    applyThemeColor(result.data.themeColorHex);
+    localStorage.setItem('themeColorHex', result.data.themeColorHex);
     localStorage.setItem('currentUserId', String(result.data.userId));
     localStorage.setItem('role', String(result.data.role));
     localStorage.setItem('language', result.data.language);
