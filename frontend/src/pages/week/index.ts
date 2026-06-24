@@ -1,7 +1,7 @@
 import './week.css';
 import { schedules, type Schedule } from '../../api/schedules';
 import { navigate } from '../../utils/router';
-import { daysShort, fmtMonthLabel, fmtCountBadge, t } from '../../utils/i18n';
+import { daysThree, getLang, months, fmtCountBadge, t } from '../../utils/i18n';
 
 const DAYS_SHOWN   = 7;
 
@@ -27,8 +27,12 @@ function dateRangeArray(start: string, count: number): string[] {
 }
 
 function getMonthLabel(dateStr: string): string {
-  const d = new Date(`${dateStr}T00:00:00`);
-  return fmtMonthLabel(d.getMonth() + 1);
+  const d     = new Date(`${dateStr}T00:00:00`);
+  const year  = d.getFullYear();
+  const month = d.getMonth() + 1;
+  return getLang() === 'ja'
+    ? `${year}年 ${month}月`
+    : `${year} ${months()[month - 1].toUpperCase()}`;
 }
 
 function isTodayInWindow(startDate: string, today: string): boolean {
@@ -50,7 +54,7 @@ function renderRows(
 
   allDates.forEach(dateStr => {
     const d = new Date(`${dateStr}T00:00:00`);
-    const dayName = daysShort()[d.getDay()];
+    const dayName = daysThree()[d.getDay()];
     const dayNum  = String(d.getDate());
     const isToday = dateStr === today;
     const list    = scheduleMap.get(dateStr) ?? [];
@@ -280,7 +284,9 @@ export function mount(app: HTMLElement): void {
       <div class="week-top">
         <div class="week-sidebar">
           <button class="week-gear-btn" id="btn-gear" aria-label="設定">⚙</button>
-          <div class="week-month-label" id="week-month-label">${getMonthLabel(startDate)}</div>
+          <div class="week-month-wrapper">
+            <div class="week-month-label" id="week-month-label">${getMonthLabel(startDate)}</div>
+          </div>
         </div>
         <div class="week-body" id="week-body">
           <div class="week-rows-container" id="week-rows-container"></div>

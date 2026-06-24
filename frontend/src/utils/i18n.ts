@@ -18,6 +18,7 @@ const MONTHS_EN_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','
 
 const DAYS_SHORT_JA = ['日','月','火','水','木','金','土'];
 const DAYS_SHORT_EN = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const DAYS_THREE_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DAYS_LONG_JA  = ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'];
 const DAYS_LONG_EN  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -27,6 +28,10 @@ export function months(): string[] {
 
 export function daysShort(): string[] {
   return currentLang === 'ja' ? DAYS_SHORT_JA : DAYS_SHORT_EN;
+}
+
+export function daysThree(): string[] {
+  return currentLang === 'ja' ? DAYS_SHORT_JA : DAYS_THREE_EN;
 }
 
 export function daysLong(): string[] {
