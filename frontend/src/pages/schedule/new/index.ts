@@ -116,7 +116,7 @@ export function mount(app: HTMLElement): void {
       <!-- 詳細メモシート -->
       <div class="sheet-overlay" id="overlay-detail">
         <div class="bottom-sheet">
-          <div class="sheet-title">詳細メモ</div>
+          <div class="sheet-title">${t('schedule.memo.title')}</div>
           <textarea class="sheet-textarea" id="detail-textarea" placeholder="${t('schedule.memo.placeholder')}"></textarea>
           <button class="sheet-confirm-btn" id="btn-detail-confirm">完了</button>
         </div>
