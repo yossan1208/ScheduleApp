@@ -529,7 +529,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
       <div class="day-content">
         <div class="day-section-label">Schedule</div>
         <div class="day-schedule-area" id="day-schedule-area">
-          <div class="day-empty">読み込み中…</div>
+          <div class="day-empty">${t('common.loading')}</div>
         </div>
       </div>
       <div class="day-footer">
@@ -765,7 +765,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
       render();
     })
     .catch(() => {
-      area.innerHTML = '<div class="day-empty">予定を取得できませんでした</div>';
+      area.innerHTML = `<div class="day-empty">${t('day.fetchError')}</div>`;
     });
 
   page.addEventListener('click', () => closeOpenCard());
