@@ -1,6 +1,5 @@
 import type { Schedule } from '../../api/schedules';
-
-const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+import { daysShort } from '../../utils/i18n';
 const MAX_BARS = 3;
 
 function formatDate(d: Date): string {
@@ -25,8 +24,8 @@ export function buildCalendarGrid(
   const grid = document.createElement('div');
   grid.className = 'calendar-grid';
 
-  // ヘッダー行（Sun〜Sat）
-  DAY_LABELS.forEach((label, i) => {
+  // ヘッダー行
+  daysShort().forEach((label, i) => {
     const cell = document.createElement('div');
     cell.className = `calendar-header-cell${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}`;
     cell.textContent = label;
