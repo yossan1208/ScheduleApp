@@ -16,6 +16,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ===========================
@@ -30,12 +31,13 @@
   padding: 0.75rem 0 0.75rem;
   flex-shrink: 0;
   gap: 0.75rem;
+  background-color: var(--theme-color);
 }
 
 .week-gear-btn {
   background: none;
   border: none;
-  color: #aaa;
+  color: var(--theme-text-color, #f0f0f0);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0;
@@ -53,7 +55,7 @@
 
 .week-month-label {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--theme-text-color, #f0f0f0);
   white-space: nowrap;
   letter-spacing: 0.05em;
   transform: rotate(-90deg);
@@ -94,12 +96,16 @@
   border-bottom: none;
 }
 
-.week-row:nth-child(odd) {
-  background-color: color-mix(in srgb, var(--theme-color, #5c9ad6) 15%, #1a1a1a);
+.week-row:nth-child(3n + 1) {
+  background-color: color-mix(in srgb, var(--theme-color) 12%, #1a1a1a);
 }
 
-.week-row:nth-child(even) {
-  background-color: color-mix(in srgb, var(--theme-color, #5c9ad6) 5%, #1a1a1a);
+.week-row:nth-child(3n + 2) {
+  background-color: color-mix(in srgb, var(--theme-color) 22%, #1a1a1a);
+}
+
+.week-row:nth-child(3n) {
+  background-color: color-mix(in srgb, var(--theme-color) 35%, #1a1a1a);
 }
 
 .week-row:hover {
@@ -214,33 +220,30 @@
 }
 
 /* ===========================
-   FOOTER
+   FLOATING BUTTONS
    =========================== */
 
-.week-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem 1.5rem;
-  flex-shrink: 0;
+/* ← ボタン（左下固定） */
+.week-nav-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
 }
 
-/* ← ボタンを左端に固定 */
-.week-footer .nav-arrow-btn {
-  margin-right: auto;
-}
-
-/* Today button — only visible when today is outside the window */
+/* Today button — fixed, left of ! button */
 .week-today-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 152px; /* 24 + 52 + 12 + 52 + 12 = 152 */
   background: none;
-  border: 1px solid #555;
-  color: #e0e0e0;
+  border: 1px solid var(--theme-color);
+  color: var(--theme-text-color, #f0f0f0);
   border-radius: 1rem;
   padding: 0.35rem 0.85rem;
   font-size: 0.8rem;
   cursor: pointer;
   transition: background 0.15s;
+  z-index: 10;
 }
 
 .week-today-btn:hover {
@@ -250,5 +253,21 @@
 /* Hidden by default; JS adds this class to show */
 .week-today-btn.hidden {
   display: none;
+}
+
+/* ! (notes) FAB — right side */
+#btn-notes {
+  position: fixed;
+  bottom: 24px;
+  right: 88px; /* 24 + 52 + 12 = 88 */
+  z-index: 10;
+}
+
+/* + (add) FAB — rightmost */
+#btn-add {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
 }
 

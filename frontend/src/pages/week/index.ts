@@ -280,7 +280,7 @@ export function mount(app: HTMLElement): void {
   let fetchId = 0;
 
   app.innerHTML = `
-    <div class="week-page">
+    <div class="week-page" id="week-page">
       <div class="week-top">
         <div class="week-sidebar">
           <button class="week-gear-btn" id="btn-gear" aria-label="設定">⚙</button>
@@ -292,12 +292,10 @@ export function mount(app: HTMLElement): void {
           <div class="week-rows-container" id="week-rows-container"></div>
         </div>
       </div>
-      <div class="week-footer">
-        <button class="nav-arrow-btn" id="btn-to-month" aria-label="月表示へ">←</button>
-        <button class="week-today-btn hidden" id="btn-today">Today</button>
-        <button class="fab" id="btn-notes" aria-label="共有事項">!</button>
-        <button class="fab" id="btn-add"   aria-label="予定追加">+</button>
-      </div>
+      <button class="nav-arrow-btn week-nav-btn" id="btn-to-month" aria-label="月表示へ">←</button>
+      <button class="week-today-btn hidden" id="btn-today">Today</button>
+      <button class="fab" id="btn-notes" aria-label="共有事項">!</button>
+      <button class="fab" id="btn-add" aria-label="予定追加">+</button>
     </div>
   `;
 
