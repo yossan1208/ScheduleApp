@@ -31,13 +31,13 @@
   padding: 0.75rem 0 0.75rem;
   flex-shrink: 0;
   gap: 0.75rem;
-  background-color: var(--theme-color);
+  background-color: #1a1a1a;
 }
 
 .week-gear-btn {
   background: none;
   border: none;
-  color: var(--theme-text-color, #f0f0f0);
+  color: #f0f0f0;
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0;
@@ -55,7 +55,7 @@
 
 .week-month-label {
   font-size: 0.75rem;
-  color: var(--theme-text-color, #f0f0f0);
+  color: #f0f0f0;
   white-space: nowrap;
   letter-spacing: 0.05em;
   transform: rotate(-90deg);
