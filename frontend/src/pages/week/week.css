@@ -143,10 +143,10 @@
   border-radius: 50%;
 }
 
-/* Today highlight — circle with theme color */
+/* Today highlight — white circle, theme-colored text */
 .week-day-num.today {
-  background-color: var(--theme-color, #5c9ad6);
-  color: #fff;
+  background-color: #ffffff;
+  color: var(--theme-color, #5c9ad6);
   font-weight: 700;
 }
 
