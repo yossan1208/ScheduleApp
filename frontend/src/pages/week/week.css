@@ -237,7 +237,7 @@
   right: 152px; /* 24 + 52 + 12 + 52 + 12 = 152 */
   background: none;
   border: 1px solid var(--theme-color);
-  color: var(--theme-text-color, #f0f0f0);
+  color: #e0e0e0;
   border-radius: 1rem;
   padding: 0.35rem 0.85rem;
   font-size: 0.8rem;

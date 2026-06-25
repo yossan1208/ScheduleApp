@@ -5,6 +5,7 @@ import { genres } from '../../../api/genres';
 import { ColorCarousel } from '../../../components/color-carousel';
 import type { CarouselColor } from '../../../components/color-carousel';
 import { t, getLang, setLang } from '../../../utils/i18n';
+import { applyThemeColor } from '../../../utils/theme';
 import './profile.css';
 
 function escHtml(s: string): string {
@@ -212,7 +213,8 @@ export async function mount(app: HTMLElement): Promise<void> {
       });
 
       if (result.success && result.data) {
-        document.documentElement.style.setProperty('--theme-color', result.data.themeColorHex);
+        applyThemeColor(result.data.themeColorHex);
+        localStorage.setItem('themeColorHex', result.data.themeColorHex);
         setLang(result.data.language as 'ja' | 'en');
         personalCarousel?.destroy();
         themeCarousel?.destroy();
