@@ -179,10 +179,10 @@
 /* === FAB === */
 .fab-group {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  bottom: 24px;
+  right: 24px;
   display: flex;
-  gap: 0.75rem;
+  gap: 12px;
   align-items: center;
 }
 
