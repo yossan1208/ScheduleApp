@@ -146,7 +146,7 @@
 /* Today highlight — white circle, theme-colored text */
 .week-day-num.today {
   background-color: #ffffff;
-  color: var(--theme-color, #5c9ad6);
+  color: #1a1a1a;
   font-weight: 700;
 }
 
