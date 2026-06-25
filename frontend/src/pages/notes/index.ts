@@ -62,12 +62,12 @@ export async function mount(app: HTMLElement): Promise<void> {
       </div>
       <div id="notes-body"><p class="notes-empty">${t('common.loading')}</p></div>
       <button class="notes-archive-btn" id="btn-archive">${t('notes.archive')}</button>
-      <button class="notes-nav-btn" id="btn-schedule" aria-label="${t('notes.aria.schedule')}">
+      <button class="nav-arrow-btn notes-nav-btn-fixed" id="btn-schedule" aria-label="${t('notes.aria.schedule')}">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
           <path d="M8 2v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3V2h-2v2h-4V2H8zM5 10h14v10H5V10zm2 2v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
         </svg>
       </button>
-      <button class="notes-fab" id="btn-fab" aria-label="${t('notes.aria.add')}">+</button>
+      <button class="fab notes-fab-fixed" id="btn-fab" aria-label="${t('notes.aria.add')}">+</button>
     </div>
   `;
 

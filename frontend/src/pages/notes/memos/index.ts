@@ -34,12 +34,12 @@ export async function mount(app: HTMLElement): Promise<void> {
       </div>
       <div id="memos-body"></div>
       <button class="memos-archive-btn" id="btn-archive" style="display:none">${t('memos.archiveBtnLabel')}</button>
-      <button class="memos-nav-btn" id="btn-schedule" aria-label="${t('memos.aria.schedule')}">
+      <button class="nav-arrow-btn memos-nav-btn-fixed" id="btn-schedule" aria-label="${t('memos.aria.schedule')}">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
           <path d="M8 2v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3V2h-2v2h-4V2H8zM5 10h14v10H5V10zm2 2v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
         </svg>
       </button>
-      <button class="memos-fab" id="btn-fab" aria-label="${t('memos.aria.add')}">+</button>
+      <button class="fab memos-fab-fixed" id="btn-fab" aria-label="${t('memos.aria.add')}">+</button>
     </div>
   `;
 
