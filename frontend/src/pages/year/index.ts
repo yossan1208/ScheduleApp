@@ -99,9 +99,11 @@ export function mount(app: HTMLElement): void {
 
   app.innerHTML = `
     <div class="year-page" id="year-page">
-      <div class="year-header" id="year-header">${currentYear}</div>
-      <div class="year-grid"   id="year-grid"></div>
-      <button class="nav-arrow-btn year-nav-btn" id="btn-to-home" aria-label="ホームへ戻る">←</button>
+      <div class="year-header-row">
+        <div class="year-header" id="year-header">${currentYear}</div>
+        <button class="year-back-btn" id="btn-to-home" aria-label="ホームへ戻る">→</button>
+      </div>
+      <div class="year-grid" id="year-grid"></div>
     </div>
   `;
 

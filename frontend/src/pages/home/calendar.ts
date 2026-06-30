@@ -1,6 +1,6 @@
 import type { Schedule } from '../../api/schedules';
-import { daysShort } from '../../utils/i18n';
-const MAX_BARS = 3;
+import { daysThree } from '../../utils/i18n';
+const MAX_BARS = 2;
 
 function formatDate(d: Date): string {
   const y = d.getFullYear();
@@ -21,11 +21,14 @@ export function buildCalendarGrid(
   const lastDate   = new Date(year, month + 1, 0).getDate();
   const totalCells = Math.ceil((firstDow + lastDate) / 7) * 7;
 
+  const numWeeks = totalCells / 7;
+
   const grid = document.createElement('div');
   grid.className = 'calendar-grid';
+  grid.style.gridTemplateRows = `min-content repeat(${numWeeks}, 1fr)`;
 
   // ヘッダー行
-  daysShort().forEach((label, i) => {
+  daysThree().forEach((label, i) => {
     const cell = document.createElement('div');
     cell.className = `calendar-header-cell${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}`;
     cell.textContent = label;
@@ -39,8 +42,9 @@ export function buildCalendarGrid(
     const dateStr        = formatDate(date);
     const dow            = date.getDay();
 
+    const weekParity = Math.floor(i / 7) % 2 === 0 ? 'week-even' : 'week-odd';
     const cell = document.createElement('div');
-    cell.className = `calendar-cell${isCurrentMonth ? '' : ' out-of-month'}`;
+    cell.className = `calendar-cell ${weekParity}${isCurrentMonth ? '' : ' out-of-month'}`;
     if (isCurrentMonth) cell.dataset.date = dateStr;
 
     // 日付数字

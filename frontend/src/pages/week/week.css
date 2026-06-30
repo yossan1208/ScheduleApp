@@ -38,7 +38,7 @@
   background: none;
   border: none;
   color: #f0f0f0;
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -126,7 +126,7 @@
 
 .week-day-name {
   font-size: 0.6rem;
-  color: #777;
+  color: #fff;
   line-height: 1;
   margin-bottom: 0.2rem;
 }
