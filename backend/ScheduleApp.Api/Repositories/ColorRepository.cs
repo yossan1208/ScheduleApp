@@ -8,4 +8,7 @@ public class ColorRepository(AppDbContext db) : IColorRepository
 {
     public Task<List<Color>> GetAllAsync()
         => db.Colors.OrderBy(c => c.SortOrder).ToListAsync();
+
+    public Task<Color?> GetReservedAsync()
+        => db.Colors.FirstOrDefaultAsync(c => c.IsReserved);
 }

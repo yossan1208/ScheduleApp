@@ -47,6 +47,9 @@ public class GenreService(IGenreRepository repo) : IGenreService
         if (genre is null)
             return new GenreResult(null, "GENRE_NOT_FOUND");
 
+        if (genre.IsSystem)
+            return new GenreResult(null, "GENRE_SYSTEM_PROTECTED");
+
         if (await repo.IsColorUsedByGenreAsync(request.ColorId, groupId, id))
             return new GenreResult(null, "GENRE_COLOR_CONFLICT");
 
@@ -66,6 +69,9 @@ public class GenreService(IGenreRepository repo) : IGenreService
         if (genre is null)
             return new GenreResult(null, "GENRE_NOT_FOUND");
 
+        if (genre.IsSystem)
+            return new GenreResult(null, "GENRE_SYSTEM_PROTECTED");
+
         await repo.DisableAsync(id);
         return new GenreResult(null, null);
     }
@@ -75,6 +81,9 @@ public class GenreService(IGenreRepository repo) : IGenreService
         var genre = await repo.GetByIdAsync(id, groupId);
         if (genre is null)
             return new GenreResult(null, "GENRE_NOT_FOUND");
+
+        if (genre.IsSystem)
+            return new GenreResult(null, "GENRE_SYSTEM_PROTECTED");
 
         await repo.SoftDeleteAsync(id);
         return new GenreResult(null, null);
@@ -89,5 +98,6 @@ public class GenreService(IGenreRepository repo) : IGenreService
         DefaultNotificationTime = g.DefaultNotificationTime?.ToString("HH:mm"),
         IsActive                = g.IsActive,
         IsDeleted               = g.IsDeleted,
+        IsSystem                = g.IsSystem,
     };
 }

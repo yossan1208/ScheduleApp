@@ -16,7 +16,7 @@ public class GenreServiceTests
         _sut = new GenreService(_repoMock.Object);
     }
 
-    private static Genre MakeGenre(int id = 1, int colorId = 10, bool isDeleted = false, bool isActive = true) => new()
+    private static Genre MakeGenre(int id = 1, int colorId = 10, bool isDeleted = false, bool isActive = true, bool isSystem = false) => new()
     {
         Id        = id,
         Name      = "業務",
@@ -24,6 +24,7 @@ public class GenreServiceTests
         GroupId   = 1,
         IsActive  = isActive,
         IsDeleted = isDeleted,
+        IsSystem  = isSystem,
         Color     = new Color { Id = colorId, HexCode = "#3F51B5", DisplayName = "ブルー", SortOrder = 1 },
     };
 
@@ -145,5 +146,42 @@ public class GenreServiceTests
 
         Assert.Null(result.ErrorCode);
         _repoMock.Verify(r => r.SoftDeleteAsync(1), Times.Once);
+    }
+
+    // 9. Update: IsSystem ジャンル → GENRE_SYSTEM_PROTECTED
+    [Fact]
+    public async Task UpdateAsync_SystemGenre_ReturnsSystemProtected()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1, 1)).ReturnsAsync(MakeGenre(id: 1, isSystem: true));
+
+        var result = await _sut.UpdateAsync(1,
+            new GenreRequest { Name = "変更", ColorId = 20 }, groupId: 1);
+
+        Assert.Equal("GENRE_SYSTEM_PROTECTED", result.ErrorCode);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Genre>()), Times.Never);
+    }
+
+    // 10. Disable: IsSystem ジャンル → GENRE_SYSTEM_PROTECTED
+    [Fact]
+    public async Task DisableAsync_SystemGenre_ReturnsSystemProtected()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1, 1)).ReturnsAsync(MakeGenre(id: 1, isSystem: true));
+
+        var result = await _sut.DisableAsync(1, groupId: 1);
+
+        Assert.Equal("GENRE_SYSTEM_PROTECTED", result.ErrorCode);
+        _repoMock.Verify(r => r.DisableAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    // 11. Delete: IsSystem ジャンル → GENRE_SYSTEM_PROTECTED
+    [Fact]
+    public async Task DeleteAsync_SystemGenre_ReturnsSystemProtected()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1, 1)).ReturnsAsync(MakeGenre(id: 1, isSystem: true));
+
+        var result = await _sut.DeleteAsync(1, groupId: 1);
+
+        Assert.Equal("GENRE_SYSTEM_PROTECTED", result.ErrorCode);
+        _repoMock.Verify(r => r.SoftDeleteAsync(It.IsAny<int>()), Times.Never);
     }
 }

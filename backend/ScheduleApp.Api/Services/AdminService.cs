@@ -7,7 +7,9 @@ namespace ScheduleApp.Api.Services;
 public class AdminService(
     IAdminRepository adminRepo,
     INoteRepository  noteRepo,
-    IMemoRepository  memoRepo) : IAdminService
+    IMemoRepository  memoRepo,
+    IGenreRepository genreRepo,
+    IColorRepository colorRepo) : IAdminService
 {
     public async Task<List<AdminUserResponse>> GetUsersAsync(bool ungroupedOnly)
     {
@@ -71,6 +73,20 @@ public class AdminService(
             IsImportant = true,
             CreatorId   = request.UserIds[0],
         });
+
+        // 5. 「その他」ジャンル自動生成
+        var reservedColor = await colorRepo.GetReservedAsync();
+        if (reservedColor is not null)
+        {
+            await genreRepo.CreateAsync(new Genre
+            {
+                Name     = "その他",
+                ColorId  = reservedColor.Id,
+                GroupId  = group.Id,
+                IsActive = true,
+                IsSystem = true,
+            }, request.UserIds);
+        }
 
         return new AdminResult(null);
     }

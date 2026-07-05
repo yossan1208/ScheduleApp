@@ -6,4 +6,5 @@ public class Color
     public string HexCode     { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public short  SortOrder   { get; set; }
+    public bool   IsReserved  { get; set; }
 }

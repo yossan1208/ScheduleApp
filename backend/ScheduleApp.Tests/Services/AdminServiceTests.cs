@@ -11,11 +11,15 @@ public class AdminServiceTests
     private readonly Mock<IAdminRepository> _adminRepoMock = new();
     private readonly Mock<INoteRepository>  _noteRepoMock  = new();
     private readonly Mock<IMemoRepository>  _memoRepoMock  = new();
+    private readonly Mock<IGenreRepository> _genreRepoMock = new();
+    private readonly Mock<IColorRepository> _colorRepoMock = new();
     private readonly IAdminService          _sut;
 
     public AdminServiceTests()
     {
-        _sut = new AdminService(_adminRepoMock.Object, _noteRepoMock.Object, _memoRepoMock.Object);
+        _sut = new AdminService(
+            _adminRepoMock.Object, _noteRepoMock.Object, _memoRepoMock.Object,
+            _genreRepoMock.Object, _colorRepoMock.Object);
     }
 
     private static User MakeUser(int id = 1, int? groupId = 1, bool isActive = true) => new()
@@ -140,12 +144,13 @@ public class AdminServiceTests
         _adminRepoMock.Verify(r => r.CreateGroupAsync(It.IsAny<Group>()), Times.Never);
     }
 
-    // 8. CreateGroup: 正常 → グループ・ノート・メモが作成される
+    // 8. CreateGroup: 正常 → グループ・ノート・メモ・「その他」ジャンルが作成される
     [Fact]
     public async Task CreateGroupAsync_Valid_CreatesGroupNoteAndMemo()
     {
-        var group = new Group { Id = 5, Name = "営業部" };
-        var note  = new Note  { Id = 10, Name = "重要事項" };
+        var group         = new Group { Id = 5, Name = "営業部" };
+        var note          = new Note  { Id = 10, Name = "重要事項" };
+        var reservedColor = new Color { Id = 20, HexCode = "#9e9e9e", IsReserved = true };
 
         _adminRepoMock.Setup(r => r.CreateGroupAsync(It.IsAny<Group>())).ReturnsAsync(group);
         _adminRepoMock.Setup(r => r.AssignUsersToGroupAsync(5, It.IsAny<List<int>>()))
@@ -153,6 +158,9 @@ public class AdminServiceTests
         _noteRepoMock.Setup(r => r.CreateAsync(It.IsAny<Note>())).ReturnsAsync(note);
         _memoRepoMock.Setup(r => r.CreateAsync(It.IsAny<Memo>()))
                      .ReturnsAsync((Memo m) => m);
+        _colorRepoMock.Setup(r => r.GetReservedAsync()).ReturnsAsync(reservedColor);
+        _genreRepoMock.Setup(r => r.CreateAsync(It.IsAny<Genre>(), It.IsAny<List<int>>()))
+                      .ReturnsAsync((Genre g, List<int> _) => g);
 
         var result = await _sut.CreateGroupAsync(new AdminGroupRequest
         {
@@ -179,5 +187,37 @@ public class AdminServiceTests
             m.IsImportant == true &&
             m.NoteId      == 10   &&
             m.CreatorId   == 1)), Times.Once);
+
+        _genreRepoMock.Verify(r => r.CreateAsync(It.Is<Genre>(g =>
+            g.IsSystem == true  &&
+            g.Name     == "その他" &&
+            g.ColorId  == 20    &&
+            g.GroupId  == 5),
+            It.Is<List<int>>(ids => ids.SequenceEqual(new[] { 1, 2, 3 }))), Times.Once);
+    }
+
+    // 9. CreateGroup: 予約色が存在しない → 「その他」ジャンルは作成しない（グループ作成自体は成功）
+    [Fact]
+    public async Task CreateGroupAsync_NoReservedColor_SkipsGenreCreation()
+    {
+        var group = new Group { Id = 5, Name = "営業部" };
+        var note  = new Note  { Id = 10, Name = "重要事項" };
+
+        _adminRepoMock.Setup(r => r.CreateGroupAsync(It.IsAny<Group>())).ReturnsAsync(group);
+        _adminRepoMock.Setup(r => r.AssignUsersToGroupAsync(5, It.IsAny<List<int>>()))
+                      .Returns(Task.CompletedTask);
+        _noteRepoMock.Setup(r => r.CreateAsync(It.IsAny<Note>())).ReturnsAsync(note);
+        _memoRepoMock.Setup(r => r.CreateAsync(It.IsAny<Memo>()))
+                     .ReturnsAsync((Memo m) => m);
+        _colorRepoMock.Setup(r => r.GetReservedAsync()).ReturnsAsync((Color?)null);
+
+        var result = await _sut.CreateGroupAsync(new AdminGroupRequest
+        {
+            Name    = "営業部",
+            UserIds = [1, 2, 3],
+        });
+
+        Assert.Null(result.ErrorCode);
+        _genreRepoMock.Verify(r => r.CreateAsync(It.IsAny<Genre>(), It.IsAny<List<int>>()), Times.Never);
     }
 }

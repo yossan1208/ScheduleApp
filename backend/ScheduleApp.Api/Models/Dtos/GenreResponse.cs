@@ -9,4 +9,5 @@ public class GenreResponse
     public string? DefaultNotificationTime { get; set; }
     public bool    IsActive                { get; set; }
     public bool    IsDeleted               { get; set; }
+    public bool    IsSystem                { get; set; }
 }

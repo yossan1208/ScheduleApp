@@ -21,16 +21,17 @@ function renderCards(genreList: Genre[], canEdit: boolean): string {
     return `<p class="genres-empty">${t('genres.empty')}</p>`;
   }
   return genreList
-    .map(
-      (g) => `
+    .map((g) => {
+      const clickable = canEdit && !g.isSystem;
+      return `
     <div
-      class="genre-card${canEdit ? ' genre-card--clickable' : ''}"
+      class="genre-card${clickable ? ' genre-card--clickable' : ''}"
       style="background-color: ${safeColor(g.colorHex)};"
       data-id="${g.id}"
     >
       <span class="genre-card-name">${escHtml(g.name)}</span>
-    </div>`
-    )
+    </div>`;
+    })
     .join('');
 }
 
@@ -64,7 +65,7 @@ export async function mount(app: HTMLElement): Promise<void> {
   // Event delegation for card taps (GL+ only)
   if (canEdit) {
     list.addEventListener('click', (e) => {
-      const card = (e.target as HTMLElement).closest<HTMLElement>('.genre-card');
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.genre-card--clickable');
       if (!card) return;
       const id = card.dataset.id;
       if (id) {

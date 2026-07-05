@@ -132,6 +132,19 @@ export function mount(app: HTMLElement): void {
     </div>
   `;
 
+  // ─── 「その他」ジャンルを初期選択 ─────────────────────
+  genres.getGenres().then(result => {
+    if (selectedGenreId !== 0 || !result.success || !result.data) return;
+    const other = result.data.find(g => g.isSystem);
+    if (!other) return;
+    selectedGenreId    = other.id;
+    selectedGenreName  = other.name;
+    selectedGenreColor = other.colorHex;
+    app.querySelector<HTMLElement>('#genre-dot')!.style.background = other.colorHex;
+    app.querySelector<HTMLElement>('#genre-label')!.textContent    = other.name;
+    app.querySelector<HTMLElement>('#btn-genre')!.classList.add('selected');
+  });
+
   // ─── ジャンルシート ───────────────────────────────────
   app.querySelector('#btn-genre')!.addEventListener('click', () => {
     openSheet('overlay-genre');

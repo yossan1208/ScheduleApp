@@ -8,6 +8,7 @@ export interface Genre {
   defaultNotificationTime: string | null;
   isActive:                boolean;
   isDeleted:               boolean;
+  isSystem:                boolean;
 }
 
 export interface CreateGenrePayload {

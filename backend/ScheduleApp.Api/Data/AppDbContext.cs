@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.HexCode).HasColumnType("char(7)").IsRequired();
             e.Property(x => x.DisplayName).HasMaxLength(20).IsRequired();
             e.Property(x => x.SortOrder).IsRequired();
+            e.Property(x => x.IsReserved).HasDefaultValue(false).IsRequired();
             e.HasIndex(x => x.HexCode).IsUnique();
         });
 
@@ -71,6 +72,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Name).HasMaxLength(20).IsRequired();
             e.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             e.Property(x => x.IsDeleted).HasDefaultValue(false).IsRequired();
+            e.Property(x => x.IsSystem).HasDefaultValue(false).IsRequired();
             e.HasOne(x => x.Color)
              .WithMany()
              .HasForeignKey(x => x.ColorId)
