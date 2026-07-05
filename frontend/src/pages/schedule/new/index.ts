@@ -191,22 +191,28 @@ export function mount(app: HTMLElement): void {
   });
 
   // ─── Set Time / All Day トグル ────────────────────────
-  const timeRow    = app.querySelector<HTMLElement>('#time-row')!;
-  const btnSetTime = app.querySelector<HTMLElement>('#btn-set-time')!;
-  const btnAllDay  = app.querySelector<HTMLElement>('#btn-all-day')!;
+  const timeRow      = app.querySelector<HTMLElement>('#time-row')!;
+  const btnSetTime   = app.querySelector<HTMLElement>('#btn-set-time')!;
+  const btnAllDay    = app.querySelector<HTMLElement>('#btn-all-day')!;
+  const startTimeInput = app.querySelector<HTMLInputElement>('#start-time')!;
+  const endTimeInput   = app.querySelector<HTMLInputElement>('#end-time')!;
 
   btnSetTime.addEventListener('click', () => {
     isAllDay = false;
     btnSetTime.classList.add('active');
     btnAllDay.classList.remove('active');
-    timeRow.style.display = '';
+    timeRow.classList.remove('disabled');
+    startTimeInput.disabled = false;
+    endTimeInput.disabled   = false;
   });
 
   btnAllDay.addEventListener('click', () => {
     isAllDay = true;
     btnAllDay.classList.add('active');
     btnSetTime.classList.remove('active');
-    timeRow.style.display = 'none';
+    timeRow.classList.add('disabled');
+    startTimeInput.disabled = true;
+    endTimeInput.disabled   = true;
   });
 
   // ─── 通知時刻シート ───────────────────────────────────

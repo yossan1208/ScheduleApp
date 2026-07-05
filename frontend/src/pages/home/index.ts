@@ -126,6 +126,7 @@ function attachCellClick(wrapper: HTMLElement): void {
     if (didSwipe) { didSwipe = false; return; }
     const cell = (e.target as Element).closest<HTMLElement>('.calendar-cell');
     if (!cell?.dataset.date) return;
+    sessionStorage.setItem('dayReturnTo', `/home?month=${currentYear}-${currentMonth + 1}`);
     navigate(`/day?date=${cell.dataset.date}`);
   });
 }

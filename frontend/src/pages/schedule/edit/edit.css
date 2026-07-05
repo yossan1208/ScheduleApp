@@ -3,12 +3,12 @@
 /* === 削除ボタン（フッター中央） === */
 .edit-delete-btn {
   background: none;
-  border: 1px solid #644;
+  border: 1px solid #262626;
   color: #e57373;
   border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
-  font-size: 1.2rem;
+  width: 52px;
+  height: 52px;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;

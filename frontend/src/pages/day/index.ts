@@ -799,7 +799,9 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
   });
 
   app.querySelector('#btn-back')!
-    .addEventListener('click', () => history.back());
+    .addEventListener('click', () => {
+      navigate(sessionStorage.getItem('dayReturnTo') ?? '/home');
+    });
 
   app.querySelector('#btn-add')!
     .addEventListener('click', () => navigate(`/schedule/new?date=${dateStr}`));

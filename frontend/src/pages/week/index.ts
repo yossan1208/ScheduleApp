@@ -347,6 +347,7 @@ export function mount(app: HTMLElement): void {
   body.addEventListener('click', e => {
     const row = (e.target as Element).closest<HTMLElement>('.week-row');
     if (!row?.dataset.date) return;
+    sessionStorage.setItem('dayReturnTo', `/week?start=${startDate}`);
     navigate(`/day?date=${row.dataset.date}`);
   });
 

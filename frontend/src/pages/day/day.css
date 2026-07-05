@@ -103,7 +103,7 @@
   justify-content: center;
   height: 100%;
   font-size: 0.875rem;
-  color: #555;
+  color: var(--theme-empty-text-color, #999);
 }
 
 /* === タイムラインビュー === */
@@ -349,7 +349,7 @@
   left: 0;
   right: 0;
   height: 90dvh;
-  background: color-mix(in srgb, var(--theme-color) 80%, #1a1a1a);
+  background: color-mix(in srgb, var(--theme-color) 60%, #1a1a1a);
   border-radius: 1rem 1rem 0 0;
   z-index: 101;
   display: flex;

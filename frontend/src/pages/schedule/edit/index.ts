@@ -89,14 +89,14 @@ export function mount(app: HTMLElement): void {
               <input type="date" id="event-date" value="${dateStr}" />
             </div>
 
-            <div class="new-time-row" id="time-row"${isAllDay ? ' style="display:none"' : ''}>
+            <div class="new-time-row${isAllDay ? ' disabled' : ''}" id="time-row">
               <div class="new-time-block">
                 <label for="start-time">${t('schedule.label.startTime')}</label>
-                <input type="time" id="start-time" value="${startVal}" />
+                <input type="time" id="start-time" value="${startVal}"${isAllDay ? ' disabled' : ''} />
               </div>
               <div class="new-time-block">
                 <label for="end-time">${t('schedule.label.endTime')}</label>
-                <input type="time" id="end-time" value="${endVal}" />
+                <input type="time" id="end-time" value="${endVal}"${isAllDay ? ' disabled' : ''} />
               </div>
             </div>
 
@@ -242,22 +242,28 @@ export function mount(app: HTMLElement): void {
       });
 
       // ─── Set Time / All Day ──────────────────────────────
-      const timeRow    = app.querySelector<HTMLElement>('#time-row')!;
-      const btnSetTime = app.querySelector<HTMLElement>('#btn-set-time')!;
-      const btnAllDay  = app.querySelector<HTMLElement>('#btn-all-day')!;
+      const timeRow        = app.querySelector<HTMLElement>('#time-row')!;
+      const btnSetTime     = app.querySelector<HTMLElement>('#btn-set-time')!;
+      const btnAllDay      = app.querySelector<HTMLElement>('#btn-all-day')!;
+      const startTimeInput = app.querySelector<HTMLInputElement>('#start-time')!;
+      const endTimeInput   = app.querySelector<HTMLInputElement>('#end-time')!;
 
       btnSetTime.addEventListener('click', () => {
         isAllDay = false;
         btnSetTime.classList.add('active');
         btnAllDay.classList.remove('active');
-        timeRow.style.display = '';
+        timeRow.classList.remove('disabled');
+        startTimeInput.disabled = false;
+        endTimeInput.disabled   = false;
       });
 
       btnAllDay.addEventListener('click', () => {
         isAllDay = true;
         btnAllDay.classList.add('active');
         btnSetTime.classList.remove('active');
-        timeRow.style.display = 'none';
+        timeRow.classList.add('disabled');
+        startTimeInput.disabled = true;
+        endTimeInput.disabled   = true;
       });
 
       // ─── 通知時刻シート ───────────────────────────────────
