@@ -96,6 +96,8 @@ const dict: Record<Lang, Record<string, string>> = {
     'day.sheetError':    '取得に失敗しました',
     'day.self':          '自分',
     'day.other':         '他のメンバー',
+    'day.editBtn':       '編集',
+    'day.sheet.label.notif': '通知時刻',
 
     // Schedule new/edit
     'schedule.new.title':          '予定追加',
@@ -326,6 +328,8 @@ const dict: Record<Lang, Record<string, string>> = {
     'day.sheetError':    'Failed to load',
     'day.self':          'Me',
     'day.other':         'Others',
+    'day.editBtn':       'Edit',
+    'day.sheet.label.notif': 'Notification time',
 
     // Schedule new/edit
     'schedule.new.title':          'Add Schedule',

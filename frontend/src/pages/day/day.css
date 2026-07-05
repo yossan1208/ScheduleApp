@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  background-color: #1a1a1a;
+  background-color: color-mix(in srgb, var(--theme-color) 25%, #1a1a1a);
   color: #e0e0e0;
   overflow: hidden;
   user-select: none;
@@ -11,7 +11,7 @@
 
 /* === ヘッダー === */
 .day-header {
-  padding: 1.25rem 1rem 0.5rem;
+  padding: 1.25rem 1rem 0.75rem;
   flex-shrink: 0;
 }
 
@@ -33,7 +33,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0 1rem;
+  padding: 0.5rem 1rem 0;
 }
 
 .day-section-label {
@@ -172,12 +172,12 @@
 }
 
 .day-event-body {
-  padding: 0.3rem 0.5rem;
+  padding: 0.5rem 1rem;
   overflow: hidden;
 }
 
 .day-event-title {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -225,36 +225,40 @@
 
 /* === フッター === */
 .day-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 2rem 1.5rem;
+  padding: 0.75rem 1rem 1.5rem;
   flex-shrink: 0;
 }
 
 .day-footer-btn {
-  background: none;
-  border: 1px solid #444;
-  color: #e0e0e0;
+  /* background-color: var(--theme-color); */
+  background-color: color-mix(in srgb, var(--theme-color) 80%, #1a1a1a);
+  border: none;
+  color: var(--theme-text-color, #f0f0f0);
   border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
-  font-size: 1.1rem;
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.3rem;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .day-footer-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  opacity: 0.85;
 }
 
 /* トグルスイッチ（ピル形） */
 .day-toggle-wrap {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .day-toggle {
@@ -281,8 +285,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
   transition: left 0.2s;
+}
+
+.day-toggle-thumb::after {
+  content: '';
+  display: block;
+  width: 55%;
+  height: 55%;
+  background-color: var(--theme-text-color, #f0f0f0);
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.day-toggle[data-mode="list"] .day-toggle-thumb::after {
+  -webkit-mask-image: url('/clock.svg');
+  mask-image: url('/clock.svg');
+  width: 75%;
+  height: 75%;
+}
+
+.day-toggle[data-mode="timeline"] .day-toggle-thumb::after {
+  -webkit-mask-image: url('/menu-list.svg');
+  mask-image: url('/menu-list.svg');
 }
 
 /* list モード: サム右寄り */
@@ -320,7 +349,7 @@
   left: 0;
   right: 0;
   height: 90dvh;
-  background: var(--theme-color, #1a1a1a);
+  background: color-mix(in srgb, var(--theme-color) 80%, #1a1a1a);
   border-radius: 1rem 1rem 0 0;
   z-index: 101;
   display: flex;
@@ -364,12 +393,13 @@
   align-self: flex-end;
   background: none;
   border: none;
-  font-size: 1.4rem;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   line-height: 1;
   transition: opacity 0.15s;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .day-sheet-edit-btn:hover { opacity: 0.7; }
@@ -418,11 +448,6 @@
   margin-top: 0.25rem;
 }
 
-.day-sheet-icon {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
 .day-sheet-label {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.55);
@@ -430,7 +455,8 @@
 
 .day-sheet-info {
   font-size: 0.95rem;
-  color: #e0e0e0;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* With 行 */

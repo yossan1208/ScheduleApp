@@ -533,13 +533,17 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
         </div>
       </div>
       <div class="day-footer">
-        <button class="day-footer-btn" id="btn-back" aria-label="戻る">←</button>
+        <div class="day-toggle-wrap">
+          <button class="day-footer-btn" id="btn-back" aria-label="戻る">←</button>
+        </div>
         <div class="day-toggle-wrap">
           <button class="day-toggle" id="btn-toggle" data-mode="${savedMode}" aria-label="表示切替">
-            <div class="day-toggle-thumb">🕐</div>
+            <div class="day-toggle-thumb"></div>
           </button>
         </div>
-        <button class="day-footer-btn" id="btn-add" aria-label="予定追加">+</button>
+        <div class="day-toggle-wrap">
+          <button class="day-footer-btn" id="btn-add" aria-label="予定追加">+</button>
+        </div>
       </div>
     </div>
     <div class="day-sheet-overlay" id="day-sheet-overlay" style="opacity:0;pointer-events:none;"></div>
@@ -547,7 +551,7 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
       <div class="day-sheet-handle" id="day-sheet-handle"></div>
       <div class="day-sheet-header">
         <span class="day-sheet-title" id="day-sheet-title"></span>
-        <button class="day-sheet-edit-btn" id="day-sheet-edit" aria-label="編集">✏️</button>
+        <button class="day-sheet-edit-btn" id="day-sheet-edit" aria-label="${t('day.editBtn')}">${t('day.editBtn')}</button>
       </div>
       <div class="day-sheet-body" id="day-sheet-body"></div>
     </div>
@@ -641,23 +645,30 @@ function mountDay(app: HTMLElement, dateStr: string, openSheetId: number | null)
         sheetBody.appendChild(datePara);
 
         if (s.genre) {
+          const genreSec = document.createElement('div');
+          genreSec.className = 'day-sheet-section';
+          const genreLabel = document.createElement('span');
+          genreLabel.className = 'day-sheet-label';
+          genreLabel.textContent = t('schedule.label.genre');
           const badge = document.createElement('span');
           badge.className = 'day-sheet-genre-badge';
           badge.style.background = s.genre.colorHex;
           badge.style.color = isDarkColor(s.genre.colorHex) ? '#ffffff' : '#1a1a1a';
           badge.textContent = s.genre.name;
-          sheetBody.appendChild(badge);
+          genreSec.appendChild(genreLabel);
+          genreSec.appendChild(badge);
+          sheetBody.appendChild(genreSec);
         }
 
         const notifSec = document.createElement('div');
         notifSec.className = 'day-sheet-section';
-        const notifIcon = document.createElement('span');
-        notifIcon.className = 'day-sheet-icon';
-        notifIcon.textContent = '🔔';
+        const notifLabel = document.createElement('span');
+        notifLabel.className = 'day-sheet-label';
+        notifLabel.textContent = t('day.sheet.label.notif');
         const notifInfo = document.createElement('span');
         notifInfo.className = 'day-sheet-info';
         notifInfo.textContent = s.notificationTime.slice(0, 5);
-        notifSec.appendChild(notifIcon);
+        notifSec.appendChild(notifLabel);
         notifSec.appendChild(notifInfo);
         sheetBody.appendChild(notifSec);
 
